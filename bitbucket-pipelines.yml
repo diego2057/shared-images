@@ -1,0 +1,32 @@
+image: gradle:6.6.1-jdk11
+
+clone:
+  depth: full
+
+pipelines:
+  default:
+    - parallel:
+      - step:
+          name: Build
+          caches:
+            - gradle
+          script:
+            - gradle build
+          artifacts:
+            - build/**
+      - step:
+          name: Test
+          caches:
+            - gradle
+          script:
+            - gradle test
+      - step:
+          name: Sonarqube
+          caches:
+            - gradle
+          script:
+            - gradle build sonarqube
+      - step:
+          name: Security Scan
+          script:
+            - pipe: atlassian/git-secrets-scan:0.4.3
