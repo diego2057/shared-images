@@ -1,4 +1,4 @@
-package com.tul.shared.images
+package com.tul.shared.shared_images
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
