@@ -27,7 +27,7 @@ class CrudServiceImpl(
     }
 
     override fun findById(id: String): Mono<Image> {
-        return imageCrudRepository.findById(id)
+        return imageCrudRepository.findByUuid(id)
     }
 
     override fun save(image: Image, imageFilePart: FilePart): Mono<Image> {
