@@ -44,16 +44,20 @@ class CrudController(
         @RequestPart("file") filePart: FilePart,
         @RequestPart("request") imageRequest: ImageRequest
     ): Mono<ResponseEntity<ImageDto>> {
-        imageRequest.image = filePart
-        return imageCrudService.save(imageMapper.toModel(imageRequest))
+        return imageCrudService.save(imageMapper.toModel(imageRequest), filePart)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
     @PatchMapping("/{id}")
-    fun update(@PathVariable id: String, @RequestBody request: ImageRequest): Mono<ResponseEntity<ImageDto>> {
+    fun update(
+            @PathVariable id: String,
+            @RequestPart("file", required = false) filePart: FilePart?,
+            @RequestPart("request", required = false) imageRequest: ImageRequest?
+
+    ): Mono<ResponseEntity<ImageDto>> {
         return imageCrudService.findById(id)
-            .doOnNext { imageMapper.updateModel(imageMapper.toDtoFromRequest(request), it) }
-            .flatMap { imageCrudService.save(it) }
+            .doOnNext { imageMapper.updateModel(imageMapper.toDtoFromRequest(imageRequest!!), it) }
+            .flatMap { imageCrudService.save(it, filePart!!) }
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 

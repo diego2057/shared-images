@@ -20,10 +20,7 @@ interface ImageMapper {
     @Mappings
     fun toDtoFromRequest(imageRequest: ImageRequest): ImageDto
 
-    @Mappings(
-        Mapping(target = "fileName", expression = "java(imageRequest.getImage().filename())"),
-        Mapping(target = "mimeType", expression = "java(imageRequest.getImage().headers().getFirst(\"Content-Type\"))")
-    )
+    @Mappings
     fun toModel(imageRequest: ImageRequest): Image
 
     fun updateModel(imageDto: ImageDto, @MappingTarget image: Image)
