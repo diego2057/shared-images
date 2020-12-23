@@ -29,7 +29,6 @@ class CrudController(
     private val imageMapper: ImageMapper
 ) {
     @GetMapping
-    // @Cacheable("v1/categories/index")
     fun index(): ResponseEntity<Flux<ImageDto>> {
         return ResponseEntity.ok().body(imageCrudService.findAll().map { imageMapper.toDto(it) })
     }
@@ -58,10 +57,10 @@ class CrudController(
 
     ): Mono<ResponseEntity<ImageDto>> {
         return imageCrudService.findById(id)
-                .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
-                .doOnNext { if(imageRequest != null) imageMapper.updateModel(imageMapper.toDtoFromRequest(imageRequest), it) }
-                .flatMap { imageCrudService.save(it, filePart) }
-                .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
+            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
+            .doOnNext { if (imageRequest != null) imageMapper.updateModel(imageMapper.toDtoFromRequest(imageRequest), it) }
+            .flatMap { imageCrudService.save(it, filePart) }
+            .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
     @DeleteMapping("/{id}")
@@ -70,5 +69,12 @@ class CrudController(
             .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
             .flatMap { imageCrudService.delete(it) }
             .thenReturn(ResponseEntity.noContent().build())
+    }
+
+    @PostMapping("/test")
+    fun test(
+            @RequestPart("file") filePart: FilePart
+    ): Mono<ResponseEntity<String>> {
+        return Mono.just(ResponseEntity.ok().body(filePart.filename()))
     }
 }

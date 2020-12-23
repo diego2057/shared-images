@@ -17,7 +17,7 @@ pipelines:
             caches:
               - gradle
             script:
-              - gradle build -x lintKotlin
+              - gradle build -x lintKotlin -x test
             artifacts:
               - build/**
         - step:
@@ -25,14 +25,9 @@ pipelines:
             caches:
               - gradle
             script:
-              - gradle test
-        - step:
-            name: Sonarqube
-            caches:
-              - gradle
-            script:
-              - gradle build sonarqube
+              - gradle build jacocoTestReport sonarqube
         - step:
             name: Security Scan
             script:
               - pipe: atlassian/git-secrets-scan:0.4.3
+
