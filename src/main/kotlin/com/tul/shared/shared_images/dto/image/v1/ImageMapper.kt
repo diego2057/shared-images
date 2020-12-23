@@ -2,7 +2,6 @@ package com.tul.shared.shared_images.dto.image.v1
 
 import com.tul.shared.shared_images.model.Image
 import org.mapstruct.Mapper
-import org.mapstruct.Mapping
 import org.mapstruct.MappingTarget
 import org.mapstruct.Mappings
 import org.mapstruct.NullValuePropertyMappingStrategy

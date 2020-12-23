@@ -3,16 +3,18 @@ package com.tul.shared.shared_images.controller.image.v1
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
 import com.tul.shared.shared_images.dto.image.v1.ImageRequest
+import com.tul.shared.shared_images.dto.request.OnCreate
+import com.tul.shared.shared_images.dto.request.OnUpdate
 import com.tul.shared.shared_images.service.image.CrudService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
@@ -42,7 +44,7 @@ class CrudController(
     @PostMapping
     fun create(
         @RequestPart("file") filePart: FilePart,
-        @RequestPart("request") imageRequest: ImageRequest
+        @Validated(OnCreate::class) @RequestPart("request") imageRequest: ImageRequest
     ): Mono<ResponseEntity<ImageDto>> {
         return imageCrudService.save(imageMapper.toModel(imageRequest), filePart)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
@@ -50,15 +52,16 @@ class CrudController(
 
     @PatchMapping("/{id}")
     fun update(
-            @PathVariable id: String,
-            @RequestPart("file", required = false) filePart: FilePart?,
-            @RequestPart("request", required = false) imageRequest: ImageRequest?
+        @PathVariable id: String,
+        @RequestPart("file", required = false) filePart: FilePart?,
+        @Validated(OnUpdate::class) @RequestPart("request", required = false) imageRequest: ImageRequest?
 
     ): Mono<ResponseEntity<ImageDto>> {
         return imageCrudService.findById(id)
-            .doOnNext { imageMapper.updateModel(imageMapper.toDtoFromRequest(imageRequest!!), it) }
-            .flatMap { imageCrudService.save(it, filePart!!) }
-            .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
+                .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
+                .doOnNext { if(imageRequest != null) imageMapper.updateModel(imageMapper.toDtoFromRequest(imageRequest), it) }
+                .flatMap { imageCrudService.save(it, filePart) }
+                .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
     @DeleteMapping("/{id}")
