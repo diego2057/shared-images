@@ -35,6 +35,7 @@ dependencies {
 	kapt("org.mapstruct:mapstruct-processor:1.4.1.Final")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	//testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
+	testImplementation("de.bwaldvogel:mongo-java-server:1.36.0")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 }

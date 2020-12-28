@@ -73,7 +73,7 @@ class CrudController(
 
     @PostMapping("/test")
     fun test(
-            @RequestPart("file") filePart: FilePart
+        @RequestPart("file") filePart: FilePart
     ): Mono<ResponseEntity<String>> {
         return Mono.just(ResponseEntity.ok().body(filePart.filename()))
     }
