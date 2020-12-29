@@ -1,0 +1,14 @@
+{
+  "input": {
+    "size": 2435,
+    "type": "image/png"
+  },
+  "output": {
+    "size": 2275,
+    "type": "image/png",
+    "width": 269,
+    "height": 253,
+    "ratio": 0.8565,
+    "url": "http://localhost:8090/output/Th1s1s4t35t"
+  }
+}

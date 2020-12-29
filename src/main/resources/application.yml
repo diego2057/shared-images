@@ -1,0 +1,29 @@
+app:
+  description: ${app.name} is a Spring Boot application
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: testdb
+  servlet:
+    multipart:
+      enabled: true
+  output:
+    ansi:
+      enabled: ALWAYS
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+server:
+  error:
+    include-stacktrace: never
+logging:
+  level:
+    tul:
+      com:
+        examples:
+          spring: TRACE
+    org:
+      springframework:
+        cache: TRACE
