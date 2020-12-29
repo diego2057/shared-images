@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Component
-class TinifyClient(
+class TinifyService(
     @Value("\${tinify.key}")
     private val TINIFY_KEY: String,
     @Value("\${tinify.url}")

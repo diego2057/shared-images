@@ -4,24 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.CrudService
-import com.tul.shared.shared_images.service.tinify.TinifyClient
+import com.tul.shared.shared_images.service.tinify.TinifyService
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
 class CrudServiceImpl(
     private val imageCrudRepository: CrudRepository,
-    private val tinifyClient: TinifyClient
+    private val tinifyService: TinifyService
 ) : CrudService {
-
-    fun tinyWebService(): WebClient {
-        return WebClient.builder()
-            .baseUrl("https://api.tinify.com")
-            .build()
-    }
 
     override fun findAll(): Flux<Image> {
         return imageCrudRepository.findAll()
@@ -37,7 +30,7 @@ class CrudServiceImpl(
             image.mimeType = imageFilePart.headers().getFirst("Content-Type")!!
             compressImage(imageFilePart)
                 .doOnNext { image.size = it.get("input").get("size").asLong() }
-                .flatMap { tinifyClient.storeImage(it.get("output").get("url").textValue(), image.fileName!!) }
+                .flatMap { tinifyService.storeImage(it.get("output").get("url").textValue(), image.fileName!!) }
                 .flatMap {
                     image.url = it
                     imageCrudRepository.save(image)
@@ -58,6 +51,6 @@ class CrudServiceImpl(
                 val byteArray = ByteArray(dataBuffer.readableByteCount())
                 dataBuffer.read(byteArray)
                 return@map byteArray
-            }.flatMap { tinifyClient.compressImage(it) }
+            }.flatMap { tinifyService.compressImage(it) }
     }
 }
