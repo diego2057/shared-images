@@ -9,18 +9,6 @@ import org.springframework.context.annotation.Bean
 
 @TestConfiguration
 class TestConfiguration {
-
-    /*@Bean
-    fun mongoTemplate(mongoDbFactory: MongoDatabaseFactory): MongoTemplate {
-        return MongoTemplate(mongoDbFactory)
-    }*/
-
-    /*@Bean
-    fun mongoDbFactory(mongoServer: MongoServer): MongoDatabaseFactory {
-        val serverAddress = mongoServer.localAddress
-        return SimpleMongoClientDatabaseFactory("mongodb://" + serverAddress.hostName + ":" + serverAddress.port + "/test")
-    }*/
-
     @Bean(destroyMethod = "shutdown")
     fun mongoServer(): MongoServer {
         val mongoServer = MongoServer(MemoryBackend())

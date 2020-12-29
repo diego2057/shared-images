@@ -15,6 +15,8 @@ import reactor.core.publisher.Mono
 class TinifyClient(
     @Value("\${tinify.key}")
     private val TINIFY_KEY: String,
+    @Value("\${tinify.url}")
+    private val TINIFY_URL: String,
     @Value("\${aws.key-id}")
     private val AWS_KEY_ID: String,
     @Value("\${aws.secret-key}")
@@ -26,7 +28,7 @@ class TinifyClient(
 ) {
 
     private val webClient = WebClient.builder()
-        .baseUrl("https://api.tinify.com")
+        .baseUrl(TINIFY_URL)
         .build()
 
     fun storeImage(url: String, fileName: String): Mono<String> {
