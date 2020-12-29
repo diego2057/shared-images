@@ -3,7 +3,6 @@ package com.tul.shared.shared_images.service.tinify
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
@@ -46,13 +45,7 @@ class TinifyClient(
             .header(HttpHeaders.AUTHORIZATION, getAuthHeader())
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(mapOf("store" to options)))
-            .exchangeToMono {
-                if (it.statusCode() == HttpStatus.OK) {
-                    return@exchangeToMono Mono.just(it.headers().header("location")[0])
-                } else {
-                    return@exchangeToMono it.bodyToMono(String::class.java)
-                }
-            }
+            .exchangeToMono { Mono.just(it.headers().header("location")[0]) }
     }
 
     fun compressImage(byteArray: ByteArray): Mono<JsonNode> {

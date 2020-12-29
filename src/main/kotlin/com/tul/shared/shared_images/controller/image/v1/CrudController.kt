@@ -70,11 +70,4 @@ class CrudController(
             .flatMap { imageCrudService.delete(it) }
             .thenReturn(ResponseEntity.noContent().build())
     }
-
-    @PostMapping("/test")
-    fun test(
-        @RequestPart("file") filePart: FilePart
-    ): Mono<ResponseEntity<String>> {
-        return Mono.just(ResponseEntity.ok().body(filePart.filename()))
-    }
 }
