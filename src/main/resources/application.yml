@@ -6,6 +6,11 @@ spring:
       host: localhost
       port: 27017
       database: testdb
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   servlet:
     multipart:
       enabled: true

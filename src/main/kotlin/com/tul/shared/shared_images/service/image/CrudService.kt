@@ -8,6 +8,9 @@ import reactor.core.publisher.Mono
 interface CrudService {
     fun findAll(): Flux<Image>
     fun findById(id: String): Mono<Image>
-    fun save(image: Image, imageFilePart: FilePart?): Mono<Image>
+    fun save(image: Image, imageFilePart: FilePart): Mono<Image>
+    fun save(image: Image, byteArray: ByteArray): Mono<Image>
+    fun update(image: Image, imageFilePart: FilePart?): Mono<Image>
+    fun update(image: Image, byteArray: ByteArray?): Mono<Image>
     fun delete(image: Image): Mono<Void>
 }

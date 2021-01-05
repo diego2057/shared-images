@@ -86,7 +86,7 @@ class CrudControllerTest {
             .expectStatus().isOk
             .expectBody()
             .jsonPath("uuid").isEqualTo(imageRequest.uuid!!)
-            .jsonPath("fileName").isEqualTo("test.png")
+            .jsonPath("file_name").isEqualTo("test.png")
     }
 
     @Test
