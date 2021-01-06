@@ -13,30 +13,30 @@ import reactor.core.publisher.Mono
 @Component
 class TinifyService(
     @Value("\${tinify.key}")
-    private val TINIFY_KEY: String,
+    private val tinifyKey: String,
     @Value("\${tinify.url}")
-    private val TINIFY_URL: String,
+    private val tinifyUrl: String,
     @Value("\${aws.key-id}")
-    private val AWS_KEY_ID: String,
+    private val awsKeyId: String,
     @Value("\${aws.secret-key}")
-    private val AWS_SECRET_KEY: String,
+    private val awsSecretKey: String,
     @Value("\${aws.region}")
-    private val REGION: String,
+    private val region: String,
     @Value("\${aws.bucket}")
-    private val BUCKET_PATH: String
+    private val bucketPath: String
 ) {
 
     private val webClient = WebClient.builder()
-        .baseUrl(TINIFY_URL)
+        .baseUrl(tinifyUrl)
         .build()
 
     fun storeImage(url: String, fileName: String): Mono<String> {
         val options = mapOf(
             "service" to "s3",
-            "aws_access_key_id" to AWS_KEY_ID,
-            "aws_secret_access_key" to AWS_SECRET_KEY,
-            "region" to REGION,
-            "path" to "$BUCKET_PATH/$fileName"
+            "aws_access_key_id" to awsKeyId,
+            "aws_secret_access_key" to awsSecretKey,
+            "region" to region,
+            "path" to "$bucketPath/$fileName"
         )
 
         return webClient
@@ -59,6 +59,6 @@ class TinifyService(
     }
 
     private fun getAuthHeader(): String {
-        return "basic " + Base64Utils.encodeToString(("api:$TINIFY_KEY").encodeToByteArray())
+        return "basic " + Base64Utils.encodeToString(("api:$tinifyKey").encodeToByteArray())
     }
 }

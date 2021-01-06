@@ -17,7 +17,7 @@ import java.util.UUID
 @Component
 class ImageProducer(
     @Value("\${spring.kafka.producer.bootstrap-servers}")
-    private val BOOTSTRAP_SERVERS: String,
+    private val bootstrapServer: String,
     private val imageMapper: ImageMapper,
     private val objectMapper: ObjectMapper
 ) {
@@ -25,7 +25,7 @@ class ImageProducer(
 
     init {
         val props = mapOf<String, Any>(
-            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to BOOTSTRAP_SERVERS,
+            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServer,
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java
         )
