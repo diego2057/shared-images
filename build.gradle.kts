@@ -35,6 +35,7 @@ dependencies {
 	api("org.mapstruct:mapstruct:1.4.1.Final")
 	kapt("org.mapstruct:mapstruct-processor:1.4.1.Final")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.kafka:spring-kafka-test:2.6.4")
 	testImplementation("de.bwaldvogel:mongo-java-server:1.36.0")
 	testImplementation("com.github.tomakehurst:wiremock-jre8:2.25.1")
 	testImplementation("io.projectreactor:reactor-test")

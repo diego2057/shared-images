@@ -15,17 +15,21 @@ class ImageConsumer(
     private val objectMapper: ObjectMapper
 ) {
     @KafkaListener(topics = ["com.tul.shared.shared_images.v1.images.create"], groupId = "create")
-    fun created(message: String) {
+    fun create(message: String) {
         val messageImage = objectMapper.readValue(message, MessageImage::class.java)
         val image = messageToImage(messageImage)
-        imageCrudService.save(image, messageImage.byteArray!!).subscribe()
+        imageCrudService.save(image, messageImage.byteArray!!).block()
     }
 
     @KafkaListener(topics = ["com.tul.shared.shared_images.v1.images.update"], groupId = "update")
-    fun updated(message: String) {
+    fun update(message: String) {
         val messageImage = objectMapper.readValue(message, MessageImage::class.java)
-        val image = messageToImage(messageImage)
-        imageCrudService.update(image, messageImage.byteArray).subscribe()
+        val requestImage = messageToImage(messageImage)
+        val imageDto = imageMapper.toDto(requestImage)
+        imageCrudService.findById(imageDto.uuid!!)
+            .doOnNext { imageMapper.updateModel(imageDto, it) }
+            .flatMap { imageCrudService.update(it, messageImage.byteArray) }
+            .block()
     }
 
     private fun messageToImage(messageImage: MessageImage): Image {
