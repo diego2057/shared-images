@@ -29,15 +29,16 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-	implementation("org.springframework.kafka:spring-kafka")
+	implementation("io.projectreactor.kafka:reactor-kafka:1.3.1")
+	implementation("org.springframework.kafka:spring-kafka:2.6.2")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	api("org.mapstruct:mapstruct:1.4.1.Final")
 	kapt("org.mapstruct:mapstruct-processor:1.4.1.Final")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.kafka:spring-kafka-test:2.6.4")
 	testImplementation("de.bwaldvogel:mongo-java-server:1.36.0")
 	testImplementation("com.github.tomakehurst:wiremock-jre8:2.25.1")
 	testImplementation("io.projectreactor:reactor-test")
-	testImplementation("org.springframework.kafka:spring-kafka-test")
 }
 
 tasks.withType<KotlinCompile> {

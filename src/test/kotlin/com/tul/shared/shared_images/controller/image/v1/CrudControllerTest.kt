@@ -2,10 +2,10 @@ package com.tul.shared.shared_images.controller.image.v1
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.tul.shared.shared_images.configuration.TestConfiguration
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import com.tul.shared.shared_images.dto.image.v1.ImageRequest
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -27,7 +27,7 @@ import java.util.UUID
 
 @SpringBootTest(classes = [TestConfiguration::class])
 @ExtendWith(SpringExtension::class)
-@AutoConfigureWebTestClient(timeout = "600000")
+@AutoConfigureWebTestClient
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CrudControllerTest {
@@ -35,16 +35,17 @@ class CrudControllerTest {
     @Autowired
     private lateinit var client: WebTestClient
 
+    private lateinit var wireMockServer: WireMockServer
+
     @BeforeAll
     fun loadMock() {
-
-        val wireMockServer = WireMockServer(8090)
+        wireMockServer = WireMockServer(8090)
         wireMockServer.start()
 
         wireMockServer.stubFor(
             WireMock.post("/shrink")
                 .willReturn(
-                    aResponse()
+                    WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(ClassPathResource("mock/tinify-api-shrink-response.json").file.readText())
@@ -54,13 +55,18 @@ class CrudControllerTest {
         wireMockServer.stubFor(
             WireMock.post("/output/Th1s1s4t35t")
                 .willReturn(
-                    aResponse()
+                    WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withHeader(HttpHeaders.LOCATION, "https://s3.us-east-2.amazonaws.com/images/test.png")
                         .withBody("{ status : success }")
                 )
         )
+    }
+
+    @AfterAll
+    fun shutDownMock() {
+        wireMockServer.stop()
     }
 
     @Test
@@ -86,7 +92,7 @@ class CrudControllerTest {
             .expectStatus().isOk
             .expectBody()
             .jsonPath("uuid").isEqualTo(imageRequest.uuid!!)
-            .jsonPath("fileName").isEqualTo("test.png")
+            .jsonPath("file_name").isEqualTo("test.png")
     }
 
     @Test

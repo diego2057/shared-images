@@ -59,7 +59,7 @@ class CrudController(
         return imageCrudService.findById(id)
             .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
             .doOnNext { if (imageRequest != null) imageMapper.updateModel(imageMapper.toDtoFromRequest(imageRequest), it) }
-            .flatMap { imageCrudService.save(it, filePart) }
+            .flatMap { imageCrudService.update(it, filePart) }
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 

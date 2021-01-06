@@ -1,3 +1,11 @@
+spring:
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  jackson:
+    property-naming-strategy: SNAKE_CASE
 tinify:
   url: http://localhost:8090
   key: 123456
