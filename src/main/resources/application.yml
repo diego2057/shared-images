@@ -8,7 +8,7 @@ spring:
       database: testdb
   kafka:
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: ${FAMILY_KAFKA_TLS_HOST:localhost:9092}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
   servlet:
@@ -32,3 +32,11 @@ logging:
     org:
       springframework:
         cache: TRACE
+tinify:
+  url: ${TINIFY_URL:${random.value}}
+  key: ${TINIFY_KEY:${random.value}}
+aws:
+  key-id: ${AWS_KEY_ID:${random.value}}
+  secret-key: ${AWS_SECRET_KEY:${random.value}}
+  region: ${AWS_REGION:${random.value}}
+  bucket: ${AWS_BUCKET:${random.value}}
