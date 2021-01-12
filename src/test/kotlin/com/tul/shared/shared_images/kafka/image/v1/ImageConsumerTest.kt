@@ -32,9 +32,6 @@ class ImageConsumerTest {
     private lateinit var imageCrudService: CrudService
 
     @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
-    @Autowired
     private lateinit var imageConsumer: ImageConsumer
 
     private lateinit var wireMockServer: WireMockServer
@@ -82,7 +79,7 @@ class ImageConsumerTest {
         messageImage.mimeType = MediaType.IMAGE_PNG_VALUE
         messageImage.byteArray = file.file.readBytes()
 
-        imageConsumer.create(objectMapper.writeValueAsString(messageImage))
+        imageConsumer.create(messageImage)
 
         Thread.sleep(1000)
 
@@ -106,7 +103,7 @@ class ImageConsumerTest {
         messageImage.mimeType = MediaType.IMAGE_PNG_VALUE
         messageImage.byteArray = file.file.readBytes()
 
-        imageConsumer.create(objectMapper.writeValueAsString(messageImage))
+        imageConsumer.create(messageImage)
 
         Thread.sleep(1000)
 
@@ -114,7 +111,7 @@ class ImageConsumerTest {
         messageImage.title = "test-updated"
         messageImage.uuid = uuid
 
-        imageConsumer.update(objectMapper.writeValueAsString(messageImage))
+        imageConsumer.update(messageImage)
 
         Thread.sleep(1000)
 
