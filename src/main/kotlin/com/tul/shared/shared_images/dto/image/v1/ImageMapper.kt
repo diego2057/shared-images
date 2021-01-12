@@ -22,5 +22,8 @@ interface ImageMapper {
     @Mappings
     fun toModel(imageRequest: ImageRequest): Image
 
+    @Mappings
+    fun toModelFromMessage(messageImage: MessageImage): Image
+
     fun updateModel(imageDto: ImageDto, @MappingTarget image: Image)
 }

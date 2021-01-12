@@ -84,7 +84,9 @@ class ImageConsumerTest {
 
         imageConsumer.create(objectMapper.writeValueAsString(messageImage))
 
-        val image = imageCrudService.findById(messageImage.uuid!!).block()
+        Thread.sleep(1000)
+
+        val image = imageCrudService.findById(messageImage.uuid).block()
         if (image != null) {
             Assertions.assertEquals(image.fileName, messageImage.fileName)
             Assertions.assertEquals(image.title, messageImage.title)
@@ -106,13 +108,17 @@ class ImageConsumerTest {
 
         imageConsumer.create(objectMapper.writeValueAsString(messageImage))
 
+        Thread.sleep(1000)
+
         messageImage = MessageImage()
         messageImage.title = "test-updated"
         messageImage.uuid = uuid
 
         imageConsumer.update(objectMapper.writeValueAsString(messageImage))
 
-        val image = imageCrudService.findById(messageImage.uuid!!).block()
+        Thread.sleep(1000)
+
+        val image = imageCrudService.findById(messageImage.uuid).block()
 
         if (image != null) {
             Assertions.assertEquals(image.fileName, file.filename)
