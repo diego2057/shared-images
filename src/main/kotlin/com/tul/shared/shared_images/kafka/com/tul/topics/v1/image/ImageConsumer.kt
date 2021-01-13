@@ -1,9 +1,6 @@
 package com.tul.shared.shared_images.kafka.com.tul.topics.v1.image
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.tul.shared.shared_images.dto.image.v1.ImageMapper
 import com.tul.shared.shared_images.dto.image.v1.MessageImage
-import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.service.image.CrudService
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
@@ -21,5 +18,4 @@ class ImageConsumer(
     fun update(messageImage: MessageImage) {
         imageCrudService.update(messageImage).subscribe()
     }
-
 }

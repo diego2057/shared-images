@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RestController("gallery.crud")
+@RequestMapping("v1/gallery")
 class CrudController(
     private val galleryCrudService: CrudService,
     private val galleryMapper: GalleryMapper
@@ -36,7 +38,8 @@ class CrudController(
 
     @PostMapping
     fun create(
-        @Validated(OnCreate::class) @ModelAttribute galleryRequest: GalleryRequest
+        @Validated(OnCreate::class)
+        @ModelAttribute galleryRequest: GalleryRequest
     ): Mono<ResponseEntity<GalleryDto>> {
         return galleryCrudService.save(galleryRequest)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }

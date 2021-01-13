@@ -1,6 +1,5 @@
 package com.tul.shared.shared_images.kafka.image.v1
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.tul.shared.shared_images.configuration.TestConfiguration

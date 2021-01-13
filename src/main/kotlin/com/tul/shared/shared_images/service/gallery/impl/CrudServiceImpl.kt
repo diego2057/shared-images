@@ -31,14 +31,19 @@ class CrudServiceImpl(
     }
 
     override fun save(galleryRequest: GalleryRequest): Mono<Gallery> {
-        return Mono.just(galleryRequest)
-            .map { galleryMapper.toModel(galleryRequest) }
-            .doOnNext { gallery ->
-                gallery.images = galleryRequest.images
-                    .flatMap { imageRequest ->
-                        compressFilePartImage(imageMapper.toModel(imageRequest), imageRequest.image!!)
-                    }
+        val gallery = galleryMapper.toModel(galleryRequest)
+        return Flux.fromIterable(galleryRequest.images!!.asIterable())
+            .flatMap { imageRequest ->
+                val image = imageMapper.toModel(imageRequest)
+                val file = imageRequest.image!!
+                image.fileName = file.filename()
+                image.mimeType = file.headers().getFirst("Content-Type")!!
+                compressFilePartImage(image, imageRequest.image!!)
             }
+            .collectList()
+            .doOnNext { gallery.images = it }
+            .thenReturn(gallery)
+            .flatMap { galleryRepository.save(it) }
     }
 
     private fun compressFilePartImage(image: Image, imageFilePart: FilePart): Mono<Image> {
@@ -54,9 +59,7 @@ class CrudServiceImpl(
     private fun storeImage(image: Image, jsonNode: JsonNode): Mono<Image> {
         image.size = jsonNode.get("input").get("size").asLong()
         return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), image.fileName!!)
-            .map {
-                image.url = it
-                return@map image
-            }
+            .doOnNext { image.url = it }
+            .thenReturn(image)
     }
 }

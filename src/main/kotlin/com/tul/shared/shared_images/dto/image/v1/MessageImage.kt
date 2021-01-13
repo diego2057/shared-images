@@ -6,11 +6,4 @@ class MessageImage {
     var fileName: String? = null
     var mimeType: String? = null
     var title: String? = null
-
-    fun getImageRequest(): ImageRequest {
-        val imageRequest = ImageRequest()
-        imageRequest.uuid = this.uuid
-        imageRequest.title = this.title
-        return imageRequest
-    }
 }
