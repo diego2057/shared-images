@@ -1,8 +1,7 @@
 package com.tul.shared.shared_images.kafka.image.v1
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.tul.shared.shared_images.configuration.TestConfiguration
+import com.tul.shared.shared_images.configuration.TinifyMock
 import com.tul.shared.shared_images.dto.image.v1.MessageImage
 import com.tul.shared.shared_images.kafka.com.tul.topics.v1.image.ImageConsumer
 import com.tul.shared.shared_images.service.image.CrudService
@@ -15,8 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -33,38 +30,16 @@ class ImageConsumerTest {
     @Autowired
     private lateinit var imageConsumer: ImageConsumer
 
-    private lateinit var wireMockServer: WireMockServer
+    private var tinifyMock = TinifyMock(8090)
 
     @BeforeAll
     fun loadMock() {
-        wireMockServer = WireMockServer(8090)
-        wireMockServer.start()
-
-        wireMockServer.stubFor(
-            WireMock.post("/shrink")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(ClassPathResource("mock/tinify-api-shrink-response.json").file.readText())
-                )
-        )
-
-        wireMockServer.stubFor(
-            WireMock.post("/output/Th1s1s4t35t")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withHeader(HttpHeaders.LOCATION, "https://s3.us-east-2.amazonaws.com/images/test.png")
-                        .withBody("{ status : success }")
-                )
-        )
+        tinifyMock.startMockServer()
     }
 
     @AfterAll
     fun shutDownMock() {
-        wireMockServer.stop()
+        tinifyMock.stop()
     }
 
     @Test
