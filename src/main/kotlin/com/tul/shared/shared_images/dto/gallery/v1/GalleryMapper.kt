@@ -6,6 +6,8 @@ import org.mapstruct.Mapping
 import org.mapstruct.Mappings
 import org.mapstruct.NullValuePropertyMappingStrategy
 import org.mapstruct.ReportingPolicy
+import com.tul.shared.shared_images.dto.gallery.v1.kafka.GalleryRequest as KafkaGalleryRequest
+import com.tul.shared.shared_images.dto.gallery.v1.rest.GalleryRequest as RestGalleryRequest
 
 @Mapper(
     componentModel = "spring",
@@ -19,5 +21,10 @@ interface GalleryMapper {
     @Mappings(
         Mapping(target = "images", ignore = true)
     )
-    fun toModel(galleryRequest: GalleryRequest): Gallery
+    fun toModel(galleryRequest: RestGalleryRequest): Gallery
+
+    @Mappings(
+        Mapping(target = "images", ignore = true)
+    )
+    fun toModelFromMessage(galleryRequest: KafkaGalleryRequest): Gallery
 }

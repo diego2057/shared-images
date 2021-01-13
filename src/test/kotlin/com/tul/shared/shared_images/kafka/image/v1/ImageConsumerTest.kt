@@ -2,7 +2,7 @@ package com.tul.shared.shared_images.kafka.image.v1
 
 import com.tul.shared.shared_images.configuration.TestConfiguration
 import com.tul.shared.shared_images.configuration.TinifyMock
-import com.tul.shared.shared_images.dto.image.v1.MessageImage
+import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest
 import com.tul.shared.shared_images.kafka.com.tul.topics.v1.image.ImageConsumer
 import com.tul.shared.shared_images.service.image.CrudService
 import org.junit.jupiter.api.AfterAll
@@ -46,7 +46,7 @@ class ImageConsumerTest {
     fun kafkaCreateImage() {
         val file = ClassPathResource("test.png")
 
-        val messageImage = MessageImage()
+        val messageImage = ImageRequest()
         messageImage.uuid = UUID.randomUUID().toString()
         messageImage.title = "test"
         messageImage.fileName = file.filename
@@ -70,7 +70,7 @@ class ImageConsumerTest {
     fun kafkaUpdateImage() {
         val file = ClassPathResource("test.png")
         val uuid = UUID.randomUUID().toString()
-        var messageImage = MessageImage()
+        var messageImage = ImageRequest()
         messageImage.uuid = uuid
         messageImage.title = "test"
         messageImage.fileName = file.filename
@@ -81,7 +81,7 @@ class ImageConsumerTest {
 
         Thread.sleep(1000)
 
-        messageImage = MessageImage()
+        messageImage = ImageRequest()
         messageImage.title = "test-updated"
         messageImage.uuid = uuid
 

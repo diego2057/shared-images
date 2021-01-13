@@ -2,10 +2,8 @@ package com.tul.shared.shared_images.service.image.impl
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
-import com.tul.shared.shared_images.dto.image.v1.ImageRequest
-import com.tul.shared.shared_images.dto.image.v1.MessageImage
+import com.tul.shared.shared_images.kafka.com.tul.topics.v1.KafkaProducerTopic
 import com.tul.shared.shared_images.kafka.com.tul.topics.v1.image.ImageProducer
-import com.tul.shared.shared_images.kafka.com.tul.topics.v1.image.KafkaImageProducerTopic
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.CrudService
@@ -16,6 +14,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest as KafkaImageRequest
+import com.tul.shared.shared_images.dto.image.v1.rest.ImageRequest as RestImageRequest
 
 @Service("image.crud_service")
 class CrudServiceImpl(
@@ -33,24 +33,24 @@ class CrudServiceImpl(
         return imageCrudRepository.findById(id)
     }
 
-    override fun save(imageRequest: ImageRequest): Mono<Image> {
+    override fun save(imageRequest: RestImageRequest): Mono<Image> {
         val image = imageMapper.toModel(imageRequest)
         val file = imageRequest.image!!
         image.fileName = file.filename()
         image.mimeType = file.headers().getFirst("Content-Type")!!
         return compressFilePartImage(file)
             .flatMap { storeImage(image, it) }
-            .doOnNext { imageProducer.sendMessage(it, KafkaImageProducerTopic.CREATED) }
+            .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
     }
 
-    override fun save(messageImage: MessageImage): Mono<Image> {
+    override fun save(messageImage: KafkaImageRequest): Mono<Image> {
         val image = imageMapper.toModelFromMessage(messageImage)
         return tinifyService.compressImage(messageImage.byteArray!!)
             .flatMap { storeImage(image, it) }
-            .doOnNext { imageProducer.sendMessage(it, KafkaImageProducerTopic.CREATED) }
+            .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
     }
 
-    override fun update(imageRequest: ImageRequest, id: String): Mono<Image> {
+    override fun update(imageRequest: RestImageRequest, id: String): Mono<Image> {
         return imageCrudRepository.findById(id)
             .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
             .doOnNext { imageMapper.updateModel(imageMapper.toDtoFromRequest(imageRequest), it) }
@@ -63,10 +63,10 @@ class CrudServiceImpl(
                 } else {
                     imageCrudRepository.save(it)
                 }
-            }.doOnNext { imageProducer.sendMessage(it, KafkaImageProducerTopic.UPDATED) }
+            }.doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.UPDATED_IMAGE) }
     }
 
-    override fun update(messageImage: MessageImage): Mono<Image> {
+    override fun update(messageImage: KafkaImageRequest): Mono<Image> {
         return imageCrudRepository.findById(messageImage.uuid)
             .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
             .doOnNext {
@@ -79,13 +79,12 @@ class CrudServiceImpl(
                 } else {
                     imageCrudRepository.save(it)
                 }
-            }.doOnNext { imageProducer.sendMessage(it, KafkaImageProducerTopic.UPDATED) }
+            }.doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.UPDATED_IMAGE) }
     }
 
     override fun delete(id: String): Mono<Void> {
         return imageCrudRepository.findById(id)
             .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
-            .flatMap { imageCrudRepository.findById(id) }
             .flatMap { imageCrudRepository.delete(it) }
     }
 

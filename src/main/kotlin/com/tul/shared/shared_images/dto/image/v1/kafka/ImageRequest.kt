@@ -1,6 +1,6 @@
-package com.tul.shared.shared_images.dto.image.v1
+package com.tul.shared.shared_images.dto.image.v1.kafka
 
-class MessageImage {
+class ImageRequest {
     lateinit var uuid: String
     var byteArray: ByteArray? = null
     var fileName: String? = null

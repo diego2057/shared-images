@@ -2,7 +2,7 @@ package com.tul.shared.shared_images.controller.image.v1
 
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
-import com.tul.shared.shared_images.dto.image.v1.ImageRequest
+import com.tul.shared.shared_images.dto.image.v1.rest.ImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreate
 import com.tul.shared.shared_images.dto.request.OnUpdate
 import com.tul.shared.shared_images.service.image.CrudService

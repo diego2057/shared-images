@@ -1,6 +1,6 @@
 package com.tul.shared.shared_images.configuration
 
-import com.tul.shared.shared_images.dto.image.v1.MessageImage
+import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.beans.factory.annotation.Value
@@ -30,9 +30,9 @@ class KafkaConfig(
     }
 
     @Bean
-    fun messageImageKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, MessageImage> {
-        val containerFactory: ConcurrentKafkaListenerContainerFactory<String, MessageImage> = ConcurrentKafkaListenerContainerFactory<String, MessageImage>()
-        val consumerFactory: DefaultKafkaConsumerFactory<String, MessageImage> = DefaultKafkaConsumerFactory(consumerConfiguration(), StringDeserializer(), JsonDeserializer(MessageImage::class.java))
+    fun messageImageKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, ImageRequest> {
+        val containerFactory: ConcurrentKafkaListenerContainerFactory<String, ImageRequest> = ConcurrentKafkaListenerContainerFactory<String, ImageRequest>()
+        val consumerFactory: DefaultKafkaConsumerFactory<String, ImageRequest> = DefaultKafkaConsumerFactory(consumerConfiguration(), StringDeserializer(), JsonDeserializer(ImageRequest::class.java))
         containerFactory.consumerFactory = consumerFactory
         return containerFactory
     }
