@@ -1,10 +1,11 @@
-package com.tul.shared.shared_images.kafka.image.v1
+package com.tul.shared.shared_images.kafka.gallery.v1
 
 import com.tul.shared.shared_images.configuration.TestConfiguration
 import com.tul.shared.shared_images.configuration.TinifyMock
+import com.tul.shared.shared_images.dto.gallery.v1.kafka.GalleryRequest
 import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest
-import com.tul.shared.shared_images.kafka.com.tul.topics.v1.image.ImageConsumer
-import com.tul.shared.shared_images.service.image.CrudService
+import com.tul.shared.shared_images.kafka.com.tul.topics.v1.gallery.GalleryConsumer
+import com.tul.shared.shared_images.service.gallery.CrudService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -23,12 +24,12 @@ import java.util.UUID
 @ExtendWith(SpringExtension::class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ImageConsumerTest {
+class GalleryConsumerTest {
     @Autowired
-    private lateinit var imageCrudService: CrudService
+    private lateinit var galleryCrudService: CrudService
 
     @Autowired
-    private lateinit var imageConsumer: ImageConsumer
+    private lateinit var galleryConsumer: GalleryConsumer
 
     private var tinifyMock = TinifyMock(8090)
 
@@ -44,6 +45,7 @@ class ImageConsumerTest {
 
     @Test
     fun kafkaCreateImage() {
+
         val file = ClassPathResource("test.png")
 
         val imageRequest = ImageRequest().apply {
@@ -54,49 +56,20 @@ class ImageConsumerTest {
             byteArray = file.file.readBytes()
         }
 
-        imageConsumer.create(imageRequest)
+        val galleryRequest = GalleryRequest().apply {
+            uuid = UUID.randomUUID().toString()
+            images = listOf(imageRequest)
+        }
+
+        galleryConsumer.create(galleryRequest)
 
         Thread.sleep(1000)
 
-        val image = imageCrudService.findById(imageRequest.uuid).block()
-        if (image != null) {
-            Assertions.assertEquals(image.fileName, imageRequest.fileName)
-            Assertions.assertEquals(image.title, imageRequest.title)
-        } else {
-            Assertions.fail()
-        }
-    }
-
-    @Test
-    fun kafkaUpdateImage() {
-        val file = ClassPathResource("test.png")
-        val uuid = UUID.randomUUID().toString()
-        var imageRequest = ImageRequest().apply {
-            this.uuid = uuid
-            title = "test"
-            fileName = file.filename
-            mimeType = MediaType.IMAGE_PNG_VALUE
-            byteArray = file.file.readBytes()
-        }
-
-        imageConsumer.create(imageRequest)
-
-        Thread.sleep(1000)
-
-        imageRequest = ImageRequest().apply {
-            title = "test-updated"
-            this.uuid = uuid
-        }
-
-        imageConsumer.update(imageRequest)
-
-        Thread.sleep(1000)
-
-        val image = imageCrudService.findById(imageRequest.uuid).block()
-
-        if (image != null) {
-            Assertions.assertEquals(file.filename, image.fileName,)
-            Assertions.assertEquals(imageRequest.title, image.title)
+        val gallery = galleryRequest.uuid?.let { galleryCrudService.findById(it).block() }
+        if (gallery != null) {
+            Assertions.assertEquals(1, gallery.images?.size)
+            Assertions.assertEquals(imageRequest.fileName, gallery.images?.get(0)?.fileName)
+            Assertions.assertEquals(imageRequest.title, gallery.images?.get(0)?.title)
         } else {
             Assertions.fail()
         }
