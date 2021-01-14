@@ -45,7 +45,7 @@ class CrudControllerTest {
     @Test
     fun showGalleryTest() {
         var galleryDtoArray = client.get()
-            .uri("/v1/gallery")
+            .uri("/v1/galleries")
             .exchange()
             .expectStatus().isOk
             .expectBody(Array<GalleryDto>::class.java)
@@ -60,14 +60,14 @@ class CrudControllerTest {
         bodyBuilder.part("uuid", UUID.randomUUID().toString())
 
         client.post()
-            .uri("/v1/gallery")
+            .uri("/v1/galleries")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
             .exchange()
             .expectStatus().isOk
 
         galleryDtoArray = client.get()
-            .uri("/v1/gallery")
+            .uri("/v1/galleries")
             .exchange()
             .expectStatus().isOk
             .expectBody(Array<GalleryDto>::class.java)
@@ -89,7 +89,7 @@ class CrudControllerTest {
         bodyBuilder.part("uuid", uuid)
 
         client.post()
-            .uri("/v1/gallery")
+            .uri("/v1/galleries")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
             .exchange()
@@ -113,14 +113,14 @@ class CrudControllerTest {
         bodyBuilder.part("uuid", uuid)
 
         client.post()
-            .uri("/v1/gallery")
+            .uri("/v1/galleries")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
             .exchange()
             .expectStatus().isOk
 
         client.get()
-            .uri("/v1/gallery/$uuid")
+            .uri("/v1/galleries/$uuid")
             .exchange()
             .expectStatus().isOk
             .expectBody()

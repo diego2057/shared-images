@@ -19,7 +19,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RestController("gallery.crud")
-@RequestMapping("v1/gallery")
+@RequestMapping("v1/galleries")
 class CrudController(
     private val galleryCrudService: CrudService,
     private val galleryMapper: GalleryMapper
