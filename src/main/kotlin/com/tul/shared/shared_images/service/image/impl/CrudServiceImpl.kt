@@ -8,6 +8,7 @@ import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.CrudService
 import com.tul.shared.shared_images.service.tinify.TinifyService
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -19,6 +20,8 @@ import com.tul.shared.shared_images.dto.image.v1.rest.ImageRequest as RestImageR
 
 @Service("image.crud_service")
 class CrudServiceImpl(
+    @Value("\${app.default-image-id}")
+    private val defaultImageId: String,
     private val imageCrudRepository: CrudRepository,
     private val tinifyService: TinifyService,
     private val imageProducer: ImageProducer,
@@ -31,6 +34,7 @@ class CrudServiceImpl(
 
     override fun findById(id: String): Mono<Image> {
         return imageCrudRepository.findById(id)
+            .switchIfEmpty(imageCrudRepository.findById(defaultImageId))
     }
 
     override fun save(imageRequest: RestImageRequest): Mono<Image> {

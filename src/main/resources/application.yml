@@ -1,5 +1,6 @@
 app:
   description: ${app.name} is a Spring Boot application
+  default-image-id: f702f3b5-9851-401f-8833-96f77374aad5
 spring:
   data:
     mongodb:

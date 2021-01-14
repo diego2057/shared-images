@@ -45,8 +45,21 @@ class CrudControllerTest {
 
     @Test
     fun showImagesTest() {
-        val imageDtoArray = getAllImages()
-        Assertions.assertEquals(imageDtoArray.size, 0)
+        Thread.sleep(100)
+        val initialSize = getAllImages().size
+        val bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", UUID.randomUUID().toString())
+        bodyBuilder.part("title", "test")
+
+        client.post()
+            .uri("/v1/images")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+
+        val newSize = getAllImages().size
+        Assertions.assertEquals(initialSize + 1, newSize)
     }
 
     @Test
@@ -93,6 +106,18 @@ class CrudControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(imageDto!!.uuid!!)
             .jsonPath("url").isEqualTo(imageDto.url!!)
+    }
+
+    @Test
+    fun notFoundImageByIdTest() {
+        Thread.sleep(100)
+        client.get()
+            .uri("/v1/images/${UUID.randomUUID()}")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("title").isEqualTo("default")
+            .jsonPath("url").isEqualTo("https://s3.us-east-2.amazonaws.com/images/default.jpeg")
     }
 
     @Test
@@ -144,17 +169,15 @@ class CrudControllerTest {
             .exchange()
             .expectStatus().isOk
 
-        var imageDtoArray = getAllImages()
-
-        Assertions.assertEquals(imageDtoArray.size, 1)
+        val imageDtoArray = getAllImages()
 
         client.delete()
             .uri("/v1/images/${imageDtoArray[0].uuid}")
             .exchange()
             .expectStatus().isNoContent
 
-        imageDtoArray = getAllImages()
-        Assertions.assertEquals(imageDtoArray.size, 0)
+        val newSize = getAllImages().size
+        Assertions.assertEquals(imageDtoArray.size - 1, newSize)
     }
 
     private fun getAllImages(): Array<ImageDto> {
