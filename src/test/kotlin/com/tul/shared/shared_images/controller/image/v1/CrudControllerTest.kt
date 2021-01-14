@@ -1,10 +1,8 @@
 package com.tul.shared.shared_images.controller.image.v1
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.tul.shared.shared_images.configuration.TestConfiguration
+import com.tul.shared.shared_images.configuration.TinifyMock
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
-import com.tul.shared.shared_images.dto.image.v1.ImageRequest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -15,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.test.annotation.DirtiesContext
@@ -35,38 +31,16 @@ class CrudControllerTest {
     @Autowired
     private lateinit var client: WebTestClient
 
-    private lateinit var wireMockServer: WireMockServer
+    private var tinifyMock = TinifyMock(8090)
 
     @BeforeAll
     fun loadMock() {
-        wireMockServer = WireMockServer(8090)
-        wireMockServer.start()
-
-        wireMockServer.stubFor(
-            WireMock.post("/shrink")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(ClassPathResource("mock/tinify-api-shrink-response.json").file.readText())
-                )
-        )
-
-        wireMockServer.stubFor(
-            WireMock.post("/output/Th1s1s4t35t")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withHeader(HttpHeaders.LOCATION, "https://s3.us-east-2.amazonaws.com/images/test.png")
-                        .withBody("{ status : success }")
-                )
-        )
+        tinifyMock.startMockServer()
     }
 
     @AfterAll
     fun shutDownMock() {
-        wireMockServer.stop()
+        tinifyMock.stop()
     }
 
     @Test
@@ -77,12 +51,12 @@ class CrudControllerTest {
 
     @Test
     fun createImageTest() {
-        val imageRequest = ImageRequest()
-        imageRequest.uuid = UUID.randomUUID().toString()
-        imageRequest.title = "test"
+        val uuid = UUID.randomUUID().toString()
+        val title = "test"
         val bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("file", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("request", imageRequest, MediaType.APPLICATION_JSON)
+        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", uuid)
+        bodyBuilder.part("title", title)
 
         client.post()
             .uri("/v1/images")
@@ -91,18 +65,18 @@ class CrudControllerTest {
             .exchange()
             .expectStatus().isOk
             .expectBody()
-            .jsonPath("uuid").isEqualTo(imageRequest.uuid!!)
+            .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("file_name").isEqualTo("test.png")
     }
 
     @Test
     fun findImageByIdTest() {
-        val imageRequest = ImageRequest()
-        imageRequest.uuid = UUID.randomUUID().toString()
-        imageRequest.title = "test"
+        val uuid = UUID.randomUUID().toString()
+        val title = "test"
         val bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("file", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("request", imageRequest, MediaType.APPLICATION_JSON)
+        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", uuid)
+        bodyBuilder.part("title", title)
 
         val imageDto = client.post()
             .uri("/v1/images")
@@ -113,7 +87,7 @@ class CrudControllerTest {
             .expectBody(ImageDto::class.java).returnResult().responseBody
 
         client.get()
-            .uri("/v1/images/${imageRequest.uuid}")
+            .uri("/v1/images/$uuid")
             .exchange()
             .expectStatus().isOk
             .expectBody()
@@ -123,12 +97,12 @@ class CrudControllerTest {
 
     @Test
     fun updateImageDataTest() {
-        var imageRequest = ImageRequest()
-        imageRequest.uuid = UUID.randomUUID().toString()
-        imageRequest.title = "test"
+        val uuid = UUID.randomUUID().toString()
+        var title = "test"
         var bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("file", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("request", imageRequest, MediaType.APPLICATION_JSON)
+        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", uuid)
+        bodyBuilder.part("title", title)
 
         val imageDto = client.post()
             .uri("/v1/images")
@@ -138,10 +112,10 @@ class CrudControllerTest {
             .expectStatus().isOk
             .expectBody(ImageDto::class.java).returnResult().responseBody
 
-        imageRequest = ImageRequest()
-        imageRequest.title = "test-modified"
+        title = "test-modified"
         bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("request", imageRequest, MediaType.APPLICATION_JSON)
+        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("title", title)
 
         client.patch()
             .uri("/v1/images/${imageDto!!.uuid}")
@@ -151,17 +125,17 @@ class CrudControllerTest {
             .expectStatus().isOk
             .expectBody()
             .jsonPath("uuid").isEqualTo(imageDto.uuid!!)
-            .jsonPath("title").isEqualTo(imageRequest.title!!)
+            .jsonPath("title").isEqualTo(title)
     }
 
     @Test
     fun deleteImageTest() {
-        val imageRequest = ImageRequest()
-        imageRequest.uuid = UUID.randomUUID().toString()
-        imageRequest.title = "test"
+        val uuid = UUID.randomUUID().toString()
+        val title = "test"
         val bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("file", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("request", imageRequest, MediaType.APPLICATION_JSON)
+        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", uuid)
+        bodyBuilder.part("title", title)
 
         client.post()
             .uri("/v1/images")
