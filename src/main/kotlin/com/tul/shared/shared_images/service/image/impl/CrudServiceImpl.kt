@@ -41,7 +41,7 @@ class CrudServiceImpl(
         val image = imageMapper.toModel(imageRequest)
         val file = imageRequest.image!!
         image.fileName = file.filename()
-        image.mimeType = file.headers().getFirst("Content-Type")!!
+        image.mimeType = file.headers().getFirst("Content-Type")
         return compressFilePartImage(file)
             .flatMap { storeImage(image, it) }
             .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
@@ -62,7 +62,7 @@ class CrudServiceImpl(
                 val file = imageRequest.image
                 if (file != null) {
                     it.fileName = file.filename()
-                    it.mimeType = file.headers().getFirst("Content-Type")!!
+                    it.mimeType = file.headers().getFirst("Content-Type")
                     compressFilePartImage(file).flatMap { json -> storeImage(it, json) }
                 } else {
                     imageCrudRepository.save(it)

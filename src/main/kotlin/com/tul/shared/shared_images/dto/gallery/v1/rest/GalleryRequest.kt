@@ -2,14 +2,11 @@ package com.tul.shared.shared_images.dto.gallery.v1.rest
 
 import com.tul.shared.shared_images.dto.image.v1.rest.ImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreate
-import com.tul.shared.shared_images.dto.request.OnUpdate
 import javax.validation.constraints.NotNull
-import javax.validation.constraints.Null
 
-class GalleryRequest {
+class GalleryRequest(
     @NotNull(groups = [OnCreate::class])
-    @Null(groups = [OnUpdate::class])
-    var uuid: String? = null
+    var uuid: String,
     @NotNull(groups = [OnCreate::class])
-    var images: List<ImageRequest>? = null
-}
+    var images: List<ImageRequest> = ArrayList()
+)

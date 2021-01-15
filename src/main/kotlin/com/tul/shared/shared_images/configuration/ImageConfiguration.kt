@@ -19,8 +19,7 @@ class ImageConfiguration(
     override fun onApplicationEvent(event: ContextRefreshedEvent) {
         val file = ClassPathResource("default.jpeg")
 
-        val imageRequest = ImageRequest().apply {
-            uuid = defaultImageId
+        val imageRequest = ImageRequest(defaultImageId).apply {
             title = "default"
             fileName = file.filename
             mimeType = MediaType.IMAGE_JPEG_VALUE
