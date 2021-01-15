@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.UUID
 import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest as KafkaImageRequest
 import com.tul.shared.shared_images.dto.image.v1.rest.ImageRequest as RestImageRequest
 
@@ -31,13 +32,14 @@ class CrudServiceImpl(
 
     override fun findById(id: String): Mono<Image> {
         return imageCrudRepository.findById(id)
+            .switchIfEmpty(imageCrudRepository.findById(UUID(0, 0).toString()))
     }
 
     override fun save(imageRequest: RestImageRequest): Mono<Image> {
         val image = imageMapper.toModel(imageRequest)
         val file = imageRequest.image!!
         image.fileName = file.filename()
-        image.mimeType = file.headers().getFirst("Content-Type")!!
+        image.mimeType = file.headers().getFirst("Content-Type")
         return compressFilePartImage(file)
             .flatMap { storeImage(image, it) }
             .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
@@ -58,7 +60,7 @@ class CrudServiceImpl(
                 val file = imageRequest.image
                 if (file != null) {
                     it.fileName = file.filename()
-                    it.mimeType = file.headers().getFirst("Content-Type")!!
+                    it.mimeType = file.headers().getFirst("Content-Type")
                     compressFilePartImage(file).flatMap { json -> storeImage(it, json) }
                 } else {
                     imageCrudRepository.save(it)

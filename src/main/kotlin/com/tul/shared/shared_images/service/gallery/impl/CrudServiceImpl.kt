@@ -36,13 +36,13 @@ class CrudServiceImpl(
 
     override fun save(galleryRequest: RestGalleryRequest): Mono<Gallery> {
         val gallery = galleryMapper.toModel(galleryRequest)
-        return Flux.fromIterable(galleryRequest.images!!.asIterable())
+        return Flux.fromIterable(galleryRequest.images.asIterable())
             .flatMap { imageRequest ->
                 val image = imageMapper.toModel(imageRequest)
                 val file = imageRequest.image!!
                 image.fileName = file.filename()
-                image.mimeType = file.headers().getFirst("Content-Type")!!
-                compressFilePartImage(image, imageRequest.image!!)
+                image.mimeType = file.headers().getFirst("Content-Type")
+                compressFilePartImage(image, file)
             }
             .collectList()
             .doOnNext { gallery.images = it }
@@ -53,7 +53,7 @@ class CrudServiceImpl(
 
     override fun save(galleryRequest: KafkaGalleryRequest): Mono<Gallery> {
         val gallery = galleryMapper.toModelFromMessage(galleryRequest)
-        return Flux.fromIterable(galleryRequest.images!!.asIterable())
+        return Flux.fromIterable(galleryRequest.images.asIterable())
             .flatMap { imageRequest ->
                 val image = imageMapper.toModelFromMessage(imageRequest)
                 tinifyService.compressImage(imageRequest.byteArray!!).flatMap { storeImage(image, it) }

@@ -46,8 +46,7 @@ class ImageConsumerTest {
     fun kafkaCreateImage() {
         val file = ClassPathResource("test.png")
 
-        val imageRequest = ImageRequest().apply {
-            uuid = UUID.randomUUID().toString()
+        val imageRequest = ImageRequest(UUID.randomUUID().toString()).apply {
             title = "test"
             fileName = file.filename
             mimeType = MediaType.IMAGE_PNG_VALUE
@@ -71,8 +70,7 @@ class ImageConsumerTest {
     fun kafkaUpdateImage() {
         val file = ClassPathResource("test.png")
         val uuid = UUID.randomUUID().toString()
-        var imageRequest = ImageRequest().apply {
-            this.uuid = uuid
+        var imageRequest = ImageRequest(uuid).apply {
             title = "test"
             fileName = file.filename
             mimeType = MediaType.IMAGE_PNG_VALUE
@@ -83,9 +81,8 @@ class ImageConsumerTest {
 
         Thread.sleep(1000)
 
-        imageRequest = ImageRequest().apply {
+        imageRequest = ImageRequest(uuid).apply {
             title = "test-updated"
-            this.uuid = uuid
         }
 
         imageConsumer.update(imageRequest)

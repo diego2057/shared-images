@@ -48,15 +48,14 @@ class GalleryConsumerTest {
 
         val file = ClassPathResource("test.png")
 
-        val imageRequest = ImageRequest().apply {
-            uuid = UUID.randomUUID().toString()
+        val imageRequest = ImageRequest(UUID.randomUUID().toString()).apply {
             title = "test"
             fileName = file.filename
             mimeType = MediaType.IMAGE_PNG_VALUE
             byteArray = file.file.readBytes()
         }
 
-        val galleryRequest = GalleryRequest().apply {
+        val galleryRequest = GalleryRequest(UUID.randomUUID().toString()).apply {
             uuid = UUID.randomUUID().toString()
             images = listOf(imageRequest)
         }
@@ -65,7 +64,7 @@ class GalleryConsumerTest {
 
         Thread.sleep(1000)
 
-        val gallery = galleryRequest.uuid?.let { galleryCrudService.findById(it).block() }
+        val gallery = galleryRequest.uuid.let { galleryCrudService.findById(it).block() }
         if (gallery != null) {
             Assertions.assertEquals(1, gallery.images?.size)
             Assertions.assertEquals(imageRequest.fileName, gallery.images?.get(0)?.fileName)
