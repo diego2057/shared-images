@@ -2,23 +2,22 @@ package com.tul.shared.shared_images.configuration
 
 import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest
 import com.tul.shared.shared_images.service.image.CrudService
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class ImageConfiguration(
-    @Value("\${app.default-image-id}")
-    private val defaultImageId: String,
     private val imageCrudService: CrudService
 ) : ApplicationListener<ContextRefreshedEvent> {
 
     override fun onApplicationEvent(event: ContextRefreshedEvent) {
         val file = ClassPathResource("default.jpeg")
 
+        val defaultImageId = UUID(0, 0).toString()
         val imageRequest = ImageRequest(defaultImageId).apply {
             title = "default"
             fileName = file.filename
