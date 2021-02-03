@@ -12,17 +12,17 @@ import reactor.core.publisher.Mono
 
 @Component
 class TinifyService(
-    @Value("\${tinify.key}")
+    @Value("\${app.tinify.key}")
     private val tinifyKey: String,
-    @Value("\${tinify.url}")
+    @Value("\${app.tinify.url}")
     private val tinifyUrl: String,
-    @Value("\${aws.key-id}")
+    @Value("\${app.aws.key-id}")
     private val awsKeyId: String,
-    @Value("\${aws.secret-key}")
+    @Value("\${app.aws.secret-key}")
     private val awsSecretKey: String,
-    @Value("\${aws.region}")
+    @Value("\${app.aws.region}")
     private val region: String,
-    @Value("\${aws.bucket}")
+    @Value("\${app.aws.bucket}")
     private val bucketPath: String
 ) {
 

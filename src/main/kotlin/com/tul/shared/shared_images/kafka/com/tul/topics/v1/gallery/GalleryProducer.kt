@@ -18,7 +18,7 @@ import java.util.UUID
 
 @Component
 class GalleryProducer(
-    @Value("\${spring.kafka.producer.bootstrap-servers}")
+    @Value("\${spring.kafka.bootstrap-servers}")
     private val bootstrapServer: String,
     private val galleryMapper: GalleryMapper,
 ) {
