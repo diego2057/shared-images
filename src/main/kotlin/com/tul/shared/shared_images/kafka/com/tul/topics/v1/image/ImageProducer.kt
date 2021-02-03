@@ -18,7 +18,7 @@ import java.util.UUID
 
 @Component
 class ImageProducer(
-    @Value("\${spring.kafka.producer.bootstrap-servers}")
+    @Value("\${spring.kafka.bootstrap-servers}")
     private val bootstrapServer: String,
     private val imageMapper: ImageMapper,
 ) {

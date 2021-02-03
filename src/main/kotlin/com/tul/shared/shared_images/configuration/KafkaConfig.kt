@@ -14,7 +14,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer
 @Configuration
 @EnableKafka
 class KafkaConfig(
-    @Value("\${spring.kafka.consumer.bootstrap-servers}")
+    @Value("\${spring.kafka.bootstrap-servers}")
     private val bootstrapServer: String,
     @Value("\${spring.kafka.consumer.group-id}")
     private val groupId: String,

@@ -1,21 +1,23 @@
 app:
   description: ${app.name} is a Spring Boot application
+  tinify:
+    url: ${TINIFY_URL:${random.value}}
+    key: ${TINIFY_KEY:${random.value}}
+  aws:
+    key-id: ${AWS_KEY_ID:${random.value}}
+    secret-key: ${AWS_SECRET_KEY:${random.value}}
+    region: ${AWS_REGION:${random.value}}
+    bucket: ${AWS_BUCKET:${random.value}}
 spring:
   data:
     mongodb:
-      host: localhost
+      host: ${FAMILY_DOCDB_HOST:localhost}
       port: 27017
-      database: testdb
+      database: ${MS_NAME:app}
   kafka:
-    producer:
-      bootstrap-servers: ${FAMILY_KAFKA_TLS_HOST:localhost:9092}
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9092}
     consumer:
-      bootstrap-servers: ${FAMILY_KAFKA_TLS_HOST:localhost:9092}
-      group-id: shared_images
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: default
   servlet:
     multipart:
       enabled: true
@@ -37,11 +39,3 @@ logging:
     org:
       springframework:
         cache: TRACE
-tinify:
-  url: ${TINIFY_URL:${random.value}}
-  key: ${TINIFY_KEY:${random.value}}
-aws:
-  key-id: ${AWS_KEY_ID:${random.value}}
-  secret-key: ${AWS_SECRET_KEY:${random.value}}
-  region: ${AWS_REGION:${random.value}}
-  bucket: ${AWS_BUCKET:${random.value}}

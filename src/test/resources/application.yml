@@ -1,21 +1,16 @@
+app:
+  tinify:
+    url: http://localhost:8090
+    key: 123456
+  aws:
+    key-id: 12345
+    secret-key: 12345
+    region: us-east-2
+    bucket: images
 spring:
   kafka:
-    producer:
-      bootstrap-servers: localhost:9092
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9092}
     consumer:
-      bootstrap-servers: localhost:9092
-      group-id: shared_images
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: default
   jackson:
     property-naming-strategy: SNAKE_CASE
-tinify:
-  url: http://localhost:8090
-  key: 123456
-aws:
-  key-id: 12345
-  secret-key: 12345
-  region: us-east-2
-  bucket: images
