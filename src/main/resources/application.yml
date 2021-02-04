@@ -14,6 +14,8 @@ spring:
       host: ${FAMILY_DOCDB_HOST:localhost}
       port: 27017
       database: ${MS_NAME:app}
+      username: ${MS_NAME:${random.value}}
+      password: ${FAMILY_DOCDB_PASSWORD:${random.value}}
   kafka:
     bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9092}
     consumer:
