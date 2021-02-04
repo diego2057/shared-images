@@ -1,7 +1,7 @@
 app:
   description: ${app.name} is a Spring Boot application
   tinify:
-    url: ${TINIFY_URL:${random.value}}
+    url: https://api.tinify.com
     key: ${TINIFY_KEY:${random.value}}
   aws:
     key-id: ${AWS_KEY_ID:${random.value}}
