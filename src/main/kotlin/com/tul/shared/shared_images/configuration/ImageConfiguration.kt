@@ -22,7 +22,7 @@ class ImageConfiguration(
             title = "default"
             fileName = file.filename
             mimeType = MediaType.IMAGE_JPEG_VALUE
-            byteArray = file.file.readBytes()
+            byteArray = file.inputStream.readAllBytes()
         }
 
         imageCrudService.findById(defaultImageId)
