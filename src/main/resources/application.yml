@@ -7,7 +7,7 @@ app:
     key-id: ${AWS_KEY_ID:${random.value}}
     secret-key: ${AWS_SECRET_KEY:${random.value}}
     region: ${AWS_REGION:${random.value}}
-    bucket: ${AWS_BUCKET:${random.value}}
+    bucket: ${MS_NAME:app}
 spring:
   data:
     mongodb:
