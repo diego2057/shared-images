@@ -16,7 +16,7 @@ pipelines:
               script:
                 - gradle build -x lintKotlin -x test
                 - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
-                - TAG="${BITBUCKET_COMMIT::7}"
+                - TAG="${BITBUCKET_COMMIT::14}"
                 - docker build -t $REPO_SLUG .
                 - pipe: atlassian/aws-ecr-push-image:1.2.2
                   variables:
