@@ -9,6 +9,7 @@ import org.springframework.util.Base64Utils
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import java.util.UUID
 
 @Component
 class TinifyService(
@@ -31,12 +32,14 @@ class TinifyService(
         .build()
 
     fun storeImage(url: String, fileName: String): Mono<String> {
+        val uuid = UUID.randomUUID().toString()
+        val name = UUID.nameUUIDFromBytes((fileName + uuid).encodeToByteArray())
         val options = mapOf(
             "service" to "s3",
             "aws_access_key_id" to awsKeyId,
             "aws_secret_access_key" to awsSecretKey,
             "region" to region,
-            "path" to "$bucketPath/$fileName"
+            "path" to "$bucketPath/$name"
         )
 
         return webClient

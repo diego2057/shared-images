@@ -1,4 +1,4 @@
-package com.tul.shared.shared_images.configuration
+package com.tul.shared.shared_images.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

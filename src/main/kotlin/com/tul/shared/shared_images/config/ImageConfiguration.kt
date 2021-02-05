@@ -1,4 +1,4 @@
-package com.tul.shared.shared_images.configuration
+package com.tul.shared.shared_images.config
 
 import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest
 import com.tul.shared.shared_images.service.image.CrudService
