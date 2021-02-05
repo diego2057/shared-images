@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component
 class ImageConsumer(
     private val imageCrudService: CrudService,
 ) {
-    @KafkaListener(topics = ["com.tul.shared.shared_images.v1.images.create"], containerFactory = "messageImageKafkaListenerContainerFactory")
+    @KafkaListener(topics = ["com.tul.shared.shared_images.v1.images.create"], containerFactory = "config.kafka.image.consumerFactory")
     fun create(imageRequest: ImageRequest) {
         imageCrudService.save(imageRequest).subscribe()
     }
 
-    @KafkaListener(topics = ["com.tul.shared.shared_images.v1.images.update"], containerFactory = "messageImageKafkaListenerContainerFactory")
+    @KafkaListener(topics = ["com.tul.shared.shared_images.v1.images.update"], containerFactory = "config.kafka.image.consumerFactory")
     fun update(messageImage: ImageRequest) {
         imageCrudService.update(messageImage).subscribe()
     }

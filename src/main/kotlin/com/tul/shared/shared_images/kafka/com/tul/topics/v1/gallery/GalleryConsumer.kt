@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 class GalleryConsumer(
     private val galleryCrudService: CrudService
 ) {
-    @KafkaListener(topics = ["com.tul.shared.shared_images.v1.gallery.create"], containerFactory = "messageImageKafkaListenerContainerFactory")
+    @KafkaListener(topics = ["com.tul.shared.shared_images.v1.gallery.create"], containerFactory = "config.kafka.gallery.consumerFactory")
     fun create(galleryRequest: GalleryRequest) {
         galleryCrudService.save(galleryRequest).subscribe()
     }
