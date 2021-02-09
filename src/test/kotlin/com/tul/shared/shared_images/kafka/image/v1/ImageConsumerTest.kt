@@ -98,4 +98,29 @@ class ImageConsumerTest {
             Assertions.fail()
         }
     }
+
+    @Test
+    fun kafkaUpdateWithCreationImage() {
+        val file = ClassPathResource("test.png")
+        val uuid = UUID.randomUUID().toString()
+        val imageRequest = ImageRequest(uuid).apply {
+            title = "test"
+            fileName = file.filename
+            mimeType = MediaType.IMAGE_PNG_VALUE
+            byteArray = file.file.readBytes()
+        }
+
+        imageConsumer.update(imageRequest)
+
+        Thread.sleep(1000)
+
+        val image = imageCrudService.findById(imageRequest.uuid).block()
+
+        if (image != null) {
+            Assertions.assertEquals(file.filename, image.fileName,)
+            Assertions.assertEquals(imageRequest.title, image.title)
+        } else {
+            Assertions.fail()
+        }
+    }
 }

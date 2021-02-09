@@ -80,6 +80,13 @@ class CrudControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("file_name").isEqualTo("test.png")
+
+        client.post()
+            .uri("/v1/images")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isBadRequest
     }
 
     @Test

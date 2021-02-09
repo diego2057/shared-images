@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import java.util.UUID
 import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest as KafkaImageRequest
 import com.tul.shared.shared_images.dto.image.v1.rest.ImageRequest as RestImageRequest
@@ -40,16 +41,24 @@ class CrudServiceImpl(
         val file = imageRequest.image!!
         image.fileName = file.filename()
         image.mimeType = file.headers().getFirst("Content-Type")
-        return compressFilePartImage(file)
-            .flatMap { storeImage(image, it) }
-            .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
+        return imageCrudRepository.findById(imageRequest.uuid!!)
+            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageRequest.uuid} already exists") }
+            .switchIfEmpty(
+                compressFilePartImage(file)
+                    .flatMap { storeImage(image, it) }
+                    .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
+            )
     }
 
     override fun save(messageImage: KafkaImageRequest): Mono<Image> {
         val image = imageMapper.toModelFromMessage(messageImage)
-        return tinifyService.compressImage(messageImage.byteArray!!)
-            .flatMap { storeImage(image, it) }
-            .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
+        return imageCrudRepository.findById(messageImage.uuid)
+            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${messageImage.uuid} already exists") }
+            .switchIfEmpty(
+                tinifyService.compressImage(messageImage.byteArray!!)
+                    .flatMap { storeImage(image, it) }
+                    .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
+            )
     }
 
     override fun update(imageRequest: RestImageRequest, id: String): Mono<Image> {
@@ -70,7 +79,13 @@ class CrudServiceImpl(
 
     override fun update(messageImage: KafkaImageRequest): Mono<Image> {
         return imageCrudRepository.findById(messageImage.uuid)
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
+            .switchIfEmpty {
+                if (messageImage.byteArray != null && messageImage.fileName != null && messageImage.title != null) {
+                    Mono.just(imageMapper.toModelFromMessage(messageImage))
+                } else {
+                    Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND))
+                }
+            }
             .doOnNext {
                 val imageReceived = imageMapper.toModelFromMessage(messageImage)
                 imageMapper.updateModel(imageMapper.toDto(imageReceived), it)
