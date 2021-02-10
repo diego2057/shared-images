@@ -1,7 +1,9 @@
 package com.tul.shared.shared_images.service.image.impl
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
+import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.CrudService
@@ -12,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.UUID
-import com.tul.shared.shared_images.dto.image.v1.ImageRequest as RestImageRequest
 
 @Service("image.crud_service")
 class CrudServiceImpl(
@@ -30,7 +31,7 @@ class CrudServiceImpl(
             .switchIfEmpty(imageCrudRepository.findById(UUID(0, 0).toString()))
     }
 
-    override fun save(imageRequest: RestImageRequest): Mono<Image> {
+    override fun save(imageRequest: CreateImageRequest): Mono<Image> {
         val image = imageMapper.toModel(imageRequest)
         val file = imageRequest.image!!
         image.fileName = file.filename()
@@ -51,10 +52,10 @@ class CrudServiceImpl(
             ).subscribe()
     }
 
-    override fun update(imageRequest: RestImageRequest, id: String): Mono<Image> {
+    override fun update(imageRequest: UpdateImageRequest, id: String): Mono<Image> {
         return imageCrudRepository.findById(id)
             .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
-            .doOnNext { imageMapper.updateModel(imageMapper.toDtoFromRequest(imageRequest), it) }
+            .doOnNext { imageMapper.updateModel(imageRequest, it) }
             .flatMap {
                 val file = imageRequest.image
                 if (file != null) {

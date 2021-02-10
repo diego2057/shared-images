@@ -6,7 +6,6 @@ import org.mapstruct.MappingTarget
 import org.mapstruct.Mappings
 import org.mapstruct.NullValuePropertyMappingStrategy
 import org.mapstruct.ReportingPolicy
-import com.tul.shared.shared_images.dto.image.v1.ImageRequest as RestImageRequest
 
 @Mapper(
     componentModel = "spring",
@@ -18,10 +17,10 @@ interface ImageMapper {
     fun toDto(image: Image): ImageDto
 
     @Mappings
-    fun toDtoFromRequest(imageRequest: RestImageRequest): ImageDto
+    fun toDtoFromRequest(imageRequest: CreateImageRequest): ImageDto
 
     @Mappings
-    fun toModel(imageRequest: RestImageRequest): Image
+    fun toModel(imageRequest: CreateImageRequest): Image
 
-    fun updateModel(imageDto: ImageDto, @MappingTarget image: Image)
+    fun updateModel(imageRequest: UpdateImageRequest, @MappingTarget image: Image)
 }

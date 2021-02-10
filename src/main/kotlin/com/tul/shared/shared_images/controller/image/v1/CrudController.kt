@@ -1,8 +1,9 @@
 package com.tul.shared.shared_images.controller.image.v1
 
+import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
-import com.tul.shared.shared_images.dto.image.v1.ImageRequest
+import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreate
 import com.tul.shared.shared_images.dto.request.OnUpdate
 import com.tul.shared.shared_images.service.image.CrudService
@@ -41,19 +42,19 @@ class CrudController(
 
     @PostMapping
     fun create(
-        @Validated(OnCreate::class) @ModelAttribute imageRequest: ImageRequest
+        @Validated(OnCreate::class) @ModelAttribute createImageRequest: CreateImageRequest
     ): Mono<ResponseEntity<ImageDto>> {
-        return imageCrudService.save(imageRequest)
+        return imageCrudService.save(createImageRequest)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
     @PatchMapping("/{id}")
     fun update(
         @PathVariable id: String,
-        @Validated(OnUpdate::class) @ModelAttribute imageRequest: ImageRequest
+        @Validated(OnUpdate::class) @ModelAttribute updateImageRequest: UpdateImageRequest
 
     ): Mono<ResponseEntity<ImageDto>> {
-        return imageCrudService.update(imageRequest, id)
+        return imageCrudService.update(updateImageRequest, id)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 

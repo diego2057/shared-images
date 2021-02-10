@@ -36,7 +36,8 @@ class TinifyService(
     fun storeImage(url: String, fileName: String): Mono<String> {
         val uuid = UUID.randomUUID().toString()
         val name = UUID.nameUUIDFromBytes((fileName + uuid).encodeToByteArray())
-        val extension = fileName.substring(fileName.lastIndexOf('.'))
+        val extensionIndex = fileName.lastIndexOf('.')
+        val extension = if (extensionIndex > 0) fileName.substring(extensionIndex) else ""
         val options = mapOf(
             "service" to "s3",
             "aws_access_key_id" to awsKeyId,
