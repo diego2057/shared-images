@@ -12,10 +12,6 @@ spring:
   data:
     mongodb:
       uri: mongodb://${MS_NAME:app}:${FAMILY_DOCDB_PASSWORD:${random.value}}@${FAMILY_DOCDB_HOST:localhost}:27017/${MS_NAME:app}?readPreference=secondaryPreferred&retryWrites=false
-  kafka:
-    bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9092}
-    consumer:
-      group-id: default
   servlet:
     multipart:
       enabled: true
