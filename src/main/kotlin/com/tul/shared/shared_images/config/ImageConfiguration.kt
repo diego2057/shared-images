@@ -1,7 +1,7 @@
 package com.tul.shared.shared_images.config
 
+import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
-import com.tul.shared.shared_images.dto.image.v1.ImageRequest
 import com.tul.shared.shared_images.service.image.CrudService
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextRefreshedEvent
@@ -21,7 +21,7 @@ class ImageConfiguration(
 
         val defaultImageId = UUID(0, 0).toString()
         val image = imageMapper.toModel(
-            ImageRequest().apply {
+            CreateImageRequest().apply {
                 uuid = defaultImageId
                 title = "default"
             }
