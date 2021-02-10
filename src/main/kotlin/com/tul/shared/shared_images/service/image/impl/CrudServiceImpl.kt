@@ -2,8 +2,6 @@ package com.tul.shared.shared_images.service.image.impl
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
-import com.tul.shared.shared_images.kafka.com.tul.topics.v1.KafkaProducerTopic
-import com.tul.shared.shared_images.kafka.com.tul.topics.v1.image.ImageProducer
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.CrudService
@@ -20,7 +18,6 @@ import com.tul.shared.shared_images.dto.image.v1.ImageRequest as RestImageReques
 class CrudServiceImpl(
     private val imageCrudRepository: CrudRepository,
     private val tinifyService: TinifyService,
-    private val imageProducer: ImageProducer,
     private val imageMapper: ImageMapper
 ) : CrudService {
 
@@ -43,7 +40,6 @@ class CrudServiceImpl(
             .switchIfEmpty(
                 tinifyService.compressImage(file)
                     .flatMap { storeImage(image, it) }
-                    .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
             )
     }
 
@@ -52,7 +48,6 @@ class CrudServiceImpl(
             .switchIfEmpty(
                 tinifyService.compressImage(byteArray)
                     .flatMap { storeImage(image, it) }
-                    .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
             ).subscribe()
     }
 
@@ -69,7 +64,7 @@ class CrudServiceImpl(
                 } else {
                     imageCrudRepository.save(it)
                 }
-            }.doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.UPDATED_IMAGE) }
+            }
     }
 
     override fun delete(id: String): Mono<Void> {

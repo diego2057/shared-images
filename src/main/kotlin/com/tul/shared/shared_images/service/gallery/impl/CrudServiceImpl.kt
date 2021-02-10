@@ -3,8 +3,6 @@ package com.tul.shared.shared_images.service.gallery.impl
 import com.fasterxml.jackson.databind.JsonNode
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
-import com.tul.shared.shared_images.kafka.com.tul.topics.v1.KafkaProducerTopic
-import com.tul.shared.shared_images.kafka.com.tul.topics.v1.gallery.GalleryProducer
 import com.tul.shared.shared_images.model.Gallery
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.gallery.CrudRepository
@@ -22,7 +20,6 @@ class CrudServiceImpl(
     private val tinifyService: TinifyService,
     private val imageMapper: ImageMapper,
     private val galleryMapper: GalleryMapper,
-    private val galleryProducer: GalleryProducer
 ) : GalleryService {
 
     override fun findAll(): Flux<Gallery> {
@@ -47,7 +44,6 @@ class CrudServiceImpl(
             .doOnNext { gallery.images = it }
             .thenReturn(gallery)
             .flatMap { galleryRepository.save(it) }
-            .doOnNext { galleryProducer.sendMessage(it, KafkaProducerTopic.CREATED_GALLERY) }
     }
 
     private fun compressFilePartImage(image: Image, imageFilePart: FilePart): Mono<Image> {

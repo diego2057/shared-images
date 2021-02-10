@@ -8,9 +8,5 @@ app:
     region: us-east-2
     bucket: images
 spring:
-  kafka:
-    bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9092}
-    consumer:
-      group-id: default
   jackson:
     property-naming-strategy: SNAKE_CASE
