@@ -9,15 +9,12 @@ import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.CrudService
 import com.tul.shared.shared_images.service.tinify.TinifyService
 import org.springframework.http.HttpStatus
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.switchIfEmpty
 import java.util.UUID
-import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest as KafkaImageRequest
-import com.tul.shared.shared_images.dto.image.v1.rest.ImageRequest as RestImageRequest
+import com.tul.shared.shared_images.dto.image.v1.ImageRequest as RestImageRequest
 
 @Service("image.crud_service")
 class CrudServiceImpl(
@@ -44,21 +41,19 @@ class CrudServiceImpl(
         return imageCrudRepository.findById(imageRequest.uuid!!)
             .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageRequest.uuid} already exists") }
             .switchIfEmpty(
-                compressFilePartImage(file)
+                tinifyService.compressImage(file)
                     .flatMap { storeImage(image, it) }
                     .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
             )
     }
 
-    override fun save(messageImage: KafkaImageRequest): Mono<Image> {
-        val image = imageMapper.toModelFromMessage(messageImage)
-        return imageCrudRepository.findById(messageImage.uuid)
-            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${messageImage.uuid} already exists") }
+    override fun saveDefaultImage(image: Image, byteArray: ByteArray) {
+        imageCrudRepository.findById(image.uuid)
             .switchIfEmpty(
-                tinifyService.compressImage(messageImage.byteArray!!)
+                tinifyService.compressImage(byteArray)
                     .flatMap { storeImage(image, it) }
                     .doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.CREATED_IMAGE) }
-            )
+            ).subscribe()
     }
 
     override fun update(imageRequest: RestImageRequest, id: String): Mono<Image> {
@@ -70,29 +65,7 @@ class CrudServiceImpl(
                 if (file != null) {
                     it.fileName = file.filename()
                     it.mimeType = file.headers().getFirst("Content-Type")
-                    compressFilePartImage(file).flatMap { json -> storeImage(it, json) }
-                } else {
-                    imageCrudRepository.save(it)
-                }
-            }.doOnNext { imageProducer.sendMessage(it, KafkaProducerTopic.UPDATED_IMAGE) }
-    }
-
-    override fun update(messageImage: KafkaImageRequest): Mono<Image> {
-        return imageCrudRepository.findById(messageImage.uuid)
-            .switchIfEmpty {
-                if (messageImage.byteArray != null && messageImage.fileName != null && messageImage.title != null) {
-                    Mono.just(imageMapper.toModelFromMessage(messageImage))
-                } else {
-                    Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND))
-                }
-            }
-            .doOnNext {
-                val imageReceived = imageMapper.toModelFromMessage(messageImage)
-                imageMapper.updateModel(imageMapper.toDto(imageReceived), it)
-            }.flatMap {
-                val byteArray = messageImage.byteArray
-                if (byteArray != null) {
-                    tinifyService.compressImage(byteArray).flatMap { json -> storeImage(it, json) }
+                    tinifyService.compressImage(file).flatMap { json -> storeImage(it, json) }
                 } else {
                     imageCrudRepository.save(it)
                 }
@@ -103,15 +76,6 @@ class CrudServiceImpl(
         return imageCrudRepository.findById(id)
             .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
             .flatMap { imageCrudRepository.delete(it) }
-    }
-
-    private fun compressFilePartImage(imageFilePart: FilePart): Mono<JsonNode> {
-        return imageFilePart.content()
-            .map { dataBuffer ->
-                val byteArray = ByteArray(dataBuffer.readableByteCount())
-                dataBuffer.read(byteArray)
-                return@map byteArray
-            }.flatMap { tinifyService.compressImage(it) }.next()
     }
 
     private fun storeImage(image: Image, jsonNode: JsonNode): Mono<Image> {

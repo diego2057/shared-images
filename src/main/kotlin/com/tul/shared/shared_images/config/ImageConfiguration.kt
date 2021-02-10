@@ -1,6 +1,7 @@
 package com.tul.shared.shared_images.config
 
-import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest
+import com.tul.shared.shared_images.dto.image.v1.ImageMapper
+import com.tul.shared.shared_images.dto.image.v1.ImageRequest
 import com.tul.shared.shared_images.service.image.CrudService
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextRefreshedEvent
@@ -11,22 +12,24 @@ import java.util.UUID
 
 @Component
 class ImageConfiguration(
-    private val imageCrudService: CrudService
+    private val imageCrudService: CrudService,
+    private val imageMapper: ImageMapper
 ) : ApplicationListener<ContextRefreshedEvent> {
 
     override fun onApplicationEvent(event: ContextRefreshedEvent) {
         val file = ClassPathResource("default.jpeg")
 
         val defaultImageId = UUID(0, 0).toString()
-        val imageRequest = ImageRequest(defaultImageId).apply {
-            title = "default"
-            fileName = file.filename
-            mimeType = MediaType.IMAGE_JPEG_VALUE
-            byteArray = file.inputStream.readAllBytes()
-        }
+        val image = imageMapper.toModel(
+            ImageRequest().apply {
+                uuid = defaultImageId
+                title = "default"
+            }
+        )
 
-        imageCrudService.findById(defaultImageId)
-            .switchIfEmpty(imageCrudService.save(imageRequest))
-            .subscribe()
+        image.mimeType = MediaType.IMAGE_JPEG_VALUE
+        image.fileName = file.filename
+
+        imageCrudService.saveDefaultImage(image, file.inputStream.readAllBytes())
     }
 }

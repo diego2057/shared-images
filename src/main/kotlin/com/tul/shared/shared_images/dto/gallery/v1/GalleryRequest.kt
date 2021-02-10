@@ -1,6 +1,6 @@
-package com.tul.shared.shared_images.dto.gallery.v1.rest
+package com.tul.shared.shared_images.dto.gallery.v1
 
-import com.tul.shared.shared_images.dto.image.v1.rest.ImageRequest
+import com.tul.shared.shared_images.dto.image.v1.ImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreate
 import javax.validation.constraints.NotNull
 

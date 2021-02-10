@@ -2,8 +2,10 @@ package com.tul.shared.shared_images.service.tinify
 
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import org.springframework.web.reactive.function.BodyInserters
@@ -49,6 +51,16 @@ class TinifyService(
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(mapOf("store" to options)))
             .exchangeToMono { Mono.just(it.headers().header("location")[0]) }
+    }
+
+    fun compressImage(filePart: FilePart): Mono<JsonNode> {
+        return webClient
+            .post()
+            .uri("/shrink")
+            .header(HttpHeaders.AUTHORIZATION, getAuthHeader())
+            .body(BodyInserters.fromPublisher(filePart.content(), DataBuffer::class.java))
+            .retrieve()
+            .bodyToMono(JsonNode::class.java)
     }
 
     fun compressImage(byteArray: ByteArray): Mono<JsonNode> {

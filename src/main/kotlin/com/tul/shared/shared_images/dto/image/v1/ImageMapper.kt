@@ -6,8 +6,7 @@ import org.mapstruct.MappingTarget
 import org.mapstruct.Mappings
 import org.mapstruct.NullValuePropertyMappingStrategy
 import org.mapstruct.ReportingPolicy
-import com.tul.shared.shared_images.dto.image.v1.kafka.ImageRequest as KafkaImageRequest
-import com.tul.shared.shared_images.dto.image.v1.rest.ImageRequest as RestImageRequest
+import com.tul.shared.shared_images.dto.image.v1.ImageRequest as RestImageRequest
 
 @Mapper(
     componentModel = "spring",
@@ -23,9 +22,6 @@ interface ImageMapper {
 
     @Mappings
     fun toModel(imageRequest: RestImageRequest): Image
-
-    @Mappings
-    fun toModelFromMessage(imageRequest: KafkaImageRequest): Image
 
     fun updateModel(imageDto: ImageDto, @MappingTarget image: Image)
 }

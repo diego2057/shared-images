@@ -13,8 +13,7 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import com.tul.shared.shared_images.dto.gallery.v1.kafka.GalleryRequest as KafkaGalleryRequest
-import com.tul.shared.shared_images.dto.gallery.v1.rest.GalleryRequest as RestGalleryRequest
+import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest as RestGalleryRequest
 import com.tul.shared.shared_images.service.gallery.CrudService as GalleryService
 
 @Service("gallery.crud_service")
@@ -43,20 +42,6 @@ class CrudServiceImpl(
                 image.fileName = file.filename()
                 image.mimeType = file.headers().getFirst("Content-Type")
                 compressFilePartImage(image, file)
-            }
-            .collectList()
-            .doOnNext { gallery.images = it }
-            .thenReturn(gallery)
-            .flatMap { galleryRepository.save(it) }
-            .doOnNext { galleryProducer.sendMessage(it, KafkaProducerTopic.CREATED_GALLERY) }
-    }
-
-    override fun save(galleryRequest: KafkaGalleryRequest): Mono<Gallery> {
-        val gallery = galleryMapper.toModelFromMessage(galleryRequest)
-        return Flux.fromIterable(galleryRequest.images.asIterable())
-            .flatMap { imageRequest ->
-                val image = imageMapper.toModelFromMessage(imageRequest)
-                tinifyService.compressImage(imageRequest.byteArray!!).flatMap { storeImage(image, it) }
             }
             .collectList()
             .doOnNext { gallery.images = it }

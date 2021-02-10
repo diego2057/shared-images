@@ -1,4 +1,4 @@
-package com.tul.shared.shared_images.dto.image.v1.rest
+package com.tul.shared.shared_images.dto.image.v1
 
 import com.tul.shared.shared_images.dto.request.OnCreate
 import com.tul.shared.shared_images.dto.request.OnUpdate
