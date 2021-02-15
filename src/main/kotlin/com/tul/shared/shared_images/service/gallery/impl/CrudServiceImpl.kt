@@ -3,6 +3,7 @@ package com.tul.shared.shared_images.service.gallery.impl
 import com.fasterxml.jackson.databind.JsonNode
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
+import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Gallery
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.gallery.CrudRepository
@@ -44,6 +45,29 @@ class CrudServiceImpl(
             .doOnNext { gallery.images = it }
             .thenReturn(gallery)
             .flatMap { galleryRepository.save(it) }
+    }
+
+    override fun update(uuid: String, imageRequest: UpdateImageRequest): Mono<Gallery> {
+        val monoImage = Mono.just(imageRequest).map(imageMapper::toModel)
+            .flatMap {
+                val file = imageRequest.image!!
+                it.fileName = file.filename()
+                it.mimeType = file.headers().getFirst("Content-Type")
+                compressFilePartImage(it, file)
+            }
+
+        return galleryRepository.findById(uuid)
+            .zipWith(monoImage)
+            .doOnNext { it.t1.images?.add(it.t2) }
+            .flatMap { galleryRepository.save(it.t1) }
+    }
+
+    override fun deleteImage(uuid: String, imageUuid: String): Mono<Gallery> {
+        return galleryRepository.findById(uuid)
+            .flatMap {
+                it.images?.removeIf { image -> image.uuid == imageUuid }
+                galleryRepository.save(it)
+            }
     }
 
     private fun compressFilePartImage(image: Image, imageFilePart: FilePart): Mono<Image> {
