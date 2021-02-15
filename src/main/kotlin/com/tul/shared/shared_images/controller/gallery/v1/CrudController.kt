@@ -3,7 +3,7 @@ package com.tul.shared.shared_images.controller.gallery.v1
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryDto
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest
-import com.tul.shared.shared_images.dto.request.OnCreate
+import com.tul.shared.shared_images.dto.request.OnCreateGallery
 import com.tul.shared.shared_images.service.gallery.CrudService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -38,7 +38,7 @@ class CrudController(
 
     @PostMapping
     fun create(
-        @Validated(OnCreate::class)
+        @Validated(OnCreateGallery::class)
         @ModelAttribute galleryRequest: GalleryRequest
     ): Mono<ResponseEntity<GalleryDto>> {
         return galleryCrudService.save(galleryRequest)
