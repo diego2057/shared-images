@@ -56,7 +56,6 @@ class CrudControllerTest {
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
         bodyBuilder.part("images[0].title", "test")
-        bodyBuilder.part("images[0].uuid", UUID.randomUUID().toString())
         bodyBuilder.part("uuid", UUID.randomUUID().toString())
 
         client.post()
@@ -80,12 +79,10 @@ class CrudControllerTest {
     fun createGalleryTest() {
         val uuid = UUID.randomUUID().toString()
         val imageTitle = "test"
-        val imageUuid = UUID.randomUUID().toString()
         val file = ClassPathResource("test.png")
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
         bodyBuilder.part("images[0].title", imageTitle)
-        bodyBuilder.part("images[0].uuid", imageUuid)
         bodyBuilder.part("uuid", uuid)
 
         client.post()
@@ -96,7 +93,7 @@ class CrudControllerTest {
             .expectStatus().isOk
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
-            .jsonPath("images[0].uuid").isEqualTo(imageUuid)
+            .jsonPath("images[0].uuid").isNotEmpty
             .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
     }
 
@@ -104,12 +101,10 @@ class CrudControllerTest {
     fun findGalleryByIdTest() {
         val uuid = UUID.randomUUID().toString()
         val imageTitle = "test"
-        val imageUuid = UUID.randomUUID().toString()
         val file = ClassPathResource("test.png")
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
         bodyBuilder.part("images[0].title", imageTitle)
-        bodyBuilder.part("images[0].uuid", imageUuid)
         bodyBuilder.part("uuid", uuid)
 
         client.post()
@@ -125,7 +120,7 @@ class CrudControllerTest {
             .expectStatus().isOk
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
-            .jsonPath("images[0].uuid").isEqualTo(imageUuid)
+            .jsonPath("images[0].uuid").isNotEmpty
             .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
     }
 }
