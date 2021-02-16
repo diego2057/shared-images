@@ -29,7 +29,7 @@ class CrudServiceImpl(
 
     override fun findById(uuid: String): Mono<Gallery> {
         return galleryRepository.findById(uuid)
-                .switchIfEmpty(Mono.just(Gallery(uuid,mutableListOf())))
+            .switchIfEmpty(Mono.just(Gallery(uuid, mutableListOf())))
     }
 
     override fun save(galleryRequest: RestGalleryRequest): Mono<Gallery> {
