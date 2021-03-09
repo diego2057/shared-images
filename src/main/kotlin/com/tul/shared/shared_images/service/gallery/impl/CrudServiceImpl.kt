@@ -8,7 +8,6 @@ import com.tul.shared.shared_images.model.Gallery
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.gallery.CrudRepository
 import com.tul.shared.shared_images.service.tinify.TinifyService
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
