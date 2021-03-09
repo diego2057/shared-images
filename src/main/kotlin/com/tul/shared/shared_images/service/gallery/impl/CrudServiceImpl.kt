@@ -40,7 +40,7 @@ class CrudServiceImpl(
                 val file = imageRequest.image!!
                 image.fileName = file.filename()
                 image.mimeType = file.headers().getFirst("Content-Type")
-                compressFilePartImage(image, file)
+                tinifyService.compressImage(file).flatMap { storeImage(image, it) }
             }
             .collectList()
             .doOnNext { gallery.images = it }
@@ -54,7 +54,7 @@ class CrudServiceImpl(
                 val file = imageRequest.image!!
                 it.fileName = file.filename()
                 it.mimeType = file.headers().getFirst("Content-Type")
-                compressFilePartImage(it, file)
+                tinifyService.compressImage(file).flatMap { json -> storeImage(it, json) }
             }
 
         return galleryRepository.findById(uuid)
@@ -69,16 +69,6 @@ class CrudServiceImpl(
                 it.images?.removeIf { image -> image.uuid == imageUuid }
                 galleryRepository.save(it)
             }
-    }
-
-    private fun compressFilePartImage(image: Image, imageFilePart: FilePart): Mono<Image> {
-        return imageFilePart.content()
-            .map { dataBuffer ->
-                val byteArray = ByteArray(dataBuffer.readableByteCount())
-                dataBuffer.read(byteArray)
-                return@map byteArray
-            }.flatMap { tinifyService.compressImage(it) }.next()
-            .flatMap { storeImage(image, it) }
     }
 
     private fun storeImage(image: Image, jsonNode: JsonNode): Mono<Image> {
