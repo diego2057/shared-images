@@ -1,0 +1,35 @@
+app:
+  description: ${app.name} is a Spring Boot application
+  tinify:
+    url: https://api.tinify.com
+    key: ${TINIFY_KEY:${random.value}}
+  aws:
+    key-id: ${AWS_KEY_ID:${random.value}}
+    secret-key: ${AWS_SECRET_KEY:${random.value}}
+    region: ${AWS_REGION:${random.value}}
+    bucket: ${OWN_BUCKET_NAME:app}
+spring:
+  data:
+    mongodb:
+      uri: mongodb://${MS_NAME:app}:${FAMILY_DOCDB_PASSWORD:${random.value}}@${FAMILY_DOCDB_HOST:localhost}:27017/${MS_NAME:app}?readPreference=secondaryPreferred&retryWrites=false
+  servlet:
+    multipart:
+      enabled: true
+  output:
+    ansi:
+      enabled: ALWAYS
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+server:
+  error:
+    include-stacktrace: never
+logging:
+  level:
+    tul:
+      com:
+        examples:
+          spring: TRACE
+    org:
+      springframework:
+        cache: TRACE

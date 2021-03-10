@@ -1,11 +1,11 @@
-package com.tul.shared.images
+package com.tul.shared.shared_images
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class ImagesApplication
+class SharedImagesApplication
 
 fun main(args: Array<String>) {
-	runApplication<ImagesApplication>(*args)
+    runApplication<SharedImagesApplication>(*args)
 }

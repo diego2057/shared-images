@@ -1,0 +1,12 @@
+app:
+  tinify:
+    url: http://localhost:8090
+    key: 123456
+  aws:
+    key-id: 12345
+    secret-key: 12345
+    region: us-east-2
+    bucket: images
+spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
