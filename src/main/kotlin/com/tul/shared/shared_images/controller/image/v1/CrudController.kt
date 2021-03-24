@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
@@ -62,5 +63,10 @@ class CrudController(
     fun delete(@PathVariable id: String): Mono<ResponseEntity<Void>> {
         return imageCrudService.delete(id)
             .thenReturn(ResponseEntity.noContent().build())
+    }
+
+    @PostMapping("/index/multiple")
+    fun indexMultiple(@RequestBody listIds: List<String>): ResponseEntity<Flux<ImageDto>> {
+        return ResponseEntity.ok().body(imageCrudService.findIndexMultiple(listIds).map { imageMapper.toDto(it) })
     }
 }

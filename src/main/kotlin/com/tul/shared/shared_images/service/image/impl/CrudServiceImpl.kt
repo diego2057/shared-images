@@ -82,4 +82,8 @@ class CrudServiceImpl(
                 imageCrudRepository.save(image)
             }
     }
+
+    override fun findIndexMultiple(ids: List<String>): Flux<Image> {
+        return imageCrudRepository.findByUuidIn(ids)
+    }
 }
