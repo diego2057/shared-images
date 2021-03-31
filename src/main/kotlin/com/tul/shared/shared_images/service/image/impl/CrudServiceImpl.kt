@@ -3,13 +3,16 @@ package com.tul.shared.shared_images.service.image.impl
 import com.fasterxml.jackson.databind.JsonNode
 import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
+import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.CrudService
 import com.tul.shared.shared_images.service.tinify.TinifyService
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -40,6 +43,17 @@ class CrudServiceImpl(
             .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageRequest.uuid} already exists") }
             .switchIfEmpty(
                 tinifyService.compressImage(file)
+                    .flatMap { storeImage(image, it) }
+            )
+    }
+
+    override fun saveImageFromUrl(imageUrlRequest: ImageUrlRequest): Mono<Image> {
+        val image = imageMapper.toModel(imageUrlRequest)
+        return imageCrudRepository.findById(imageUrlRequest.uuid!!)
+            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageUrlRequest.uuid} already exists") }
+            .switchIfEmpty(
+                getImageFromUrl(imageUrlRequest.url!!)
+                    .flatMap { tinifyService.compressImage(it) }
                     .flatMap { storeImage(image, it) }
             )
     }
@@ -85,5 +99,14 @@ class CrudServiceImpl(
 
     override fun findIndexMultiple(ids: List<String>): Flux<Image> {
         return imageCrudRepository.findByUuidIn(ids)
+    }
+
+    private fun getImageFromUrl(url: String): Mono<ByteArray> {
+        return WebClient.create()
+            .get()
+            .uri(url)
+            .accept(MediaType.ALL)
+            .retrieve()
+            .bodyToMono(ByteArray::class.java)
     }
 }

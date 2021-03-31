@@ -3,6 +3,7 @@ package com.tul.shared.shared_images.controller.image.v1
 import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
+import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreate
 import com.tul.shared.shared_images.dto.request.OnUpdate
@@ -46,6 +47,14 @@ class CrudController(
         @Validated(OnCreate::class) @ModelAttribute createImageRequest: CreateImageRequest
     ): Mono<ResponseEntity<ImageDto>> {
         return imageCrudService.save(createImageRequest)
+            .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
+    }
+
+    @PostMapping("/url")
+    fun createFromUrl(
+        @Validated(OnCreate::class) @RequestBody imageUrlRequest: ImageUrlRequest
+    ): Mono<ResponseEntity<ImageDto>> {
+        return imageCrudService.saveImageFromUrl(imageUrlRequest)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
