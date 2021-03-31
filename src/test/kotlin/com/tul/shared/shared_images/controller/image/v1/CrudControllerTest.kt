@@ -1,5 +1,6 @@
 package com.tul.shared.shared_images.controller.image.v1
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.tul.shared.shared_images.configuration.TestConfiguration
 import com.tul.shared.shared_images.configuration.TinifyMock
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
@@ -31,6 +32,9 @@ class CrudControllerTest {
 
     @Autowired
     private lateinit var client: WebTestClient
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     private var tinifyMock = TinifyMock(8090)
 
@@ -220,5 +224,34 @@ class CrudControllerTest {
             .expectStatus().isOk
             .expectBody(Array<ImageDto>::class.java)
             .returnResult().responseBody!!
+    }
+
+    @Test
+    fun indexMultiple() {
+        val uuid = UUID.randomUUID().toString()
+        val title = "test"
+        val bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", uuid)
+        bodyBuilder.part("title", title)
+
+        client.post()
+            .uri("/v1/images")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(ImageDto::class.java).returnResult().responseBody
+
+        val response = client.post()
+            .uri("/v1/images/index/multiple")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(objectMapper.writeValueAsString(listOf(uuid))))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(Array<ImageDto>::class.java)
+            .returnResult().responseBody!!
+
+        Assertions.assertEquals(1, response.size)
     }
 }

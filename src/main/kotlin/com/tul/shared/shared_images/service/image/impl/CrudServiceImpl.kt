@@ -97,6 +97,10 @@ class CrudServiceImpl(
             }
     }
 
+    override fun findIndexMultiple(ids: List<String>): Flux<Image> {
+        return imageCrudRepository.findByUuidIn(ids)
+    }
+
     private fun getImageFromUrl(url: String): Mono<ByteArray> {
         return WebClient.create()
             .get()

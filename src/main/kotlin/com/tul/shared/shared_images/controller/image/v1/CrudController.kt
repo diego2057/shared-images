@@ -73,4 +73,9 @@ class CrudController(
         return imageCrudService.delete(id)
             .thenReturn(ResponseEntity.noContent().build())
     }
+
+    @PostMapping("/index/multiple")
+    fun indexMultiple(@RequestBody listIds: List<String>): ResponseEntity<Flux<ImageDto>> {
+        return ResponseEntity.ok().body(imageCrudService.findIndexMultiple(listIds).map { imageMapper.toDto(it) })
+    }
 }

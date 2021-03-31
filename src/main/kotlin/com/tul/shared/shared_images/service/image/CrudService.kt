@@ -15,4 +15,5 @@ interface CrudService {
     fun saveDefaultImage(image: Image, byteArray: ByteArray)
     fun update(imageRequest: UpdateImageRequest, id: String): Mono<Image>
     fun delete(id: String): Mono<Void>
+    fun findIndexMultiple(ids: List<String>): Flux<Image>
 }
