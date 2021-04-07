@@ -22,7 +22,8 @@ import java.util.UUID
 class CrudServiceImpl(
     private val imageCrudRepository: CrudRepository,
     private val tinifyService: TinifyService,
-    private val imageMapper: ImageMapper
+    private val imageMapper: ImageMapper,
+    private val webClient: WebClient
 ) : CrudService {
 
     override fun findAll(): Flux<Image> {
@@ -102,8 +103,7 @@ class CrudServiceImpl(
     }
 
     private fun getImageFromUrl(url: String): Mono<ByteArray> {
-        return WebClient.create()
-            .get()
+        return webClient.get()
             .uri(url)
             .accept(MediaType.ALL)
             .retrieve()
