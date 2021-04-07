@@ -13,20 +13,26 @@ import org.mapstruct.ReportingPolicy
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
     unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
-interface ImageMapper {
+abstract class ImageMapper {
     @Mappings
-    fun toDto(image: Image): ImageDto
+    abstract fun toDto(image: Image): ImageDto
 
     @Mappings
-    fun toDtoFromRequest(imageRequest: CreateImageRequest): ImageDto
-
-    @Mappings
-    fun toModel(imageRequest: CreateImageRequest): Image
+    abstract fun toModel(imageRequest: CreateImageRequest): Image
 
     @Mappings(
         Mapping(target = "uuid", expression = "java(java.util.UUID.randomUUID().toString())")
     )
-    fun toModel(imageRequest: UpdateImageRequest): Image
+    abstract fun toModel(imageRequest: UpdateImageRequest): Image
 
-    fun updateModel(imageRequest: UpdateImageRequest, @MappingTarget image: Image)
+    fun toModel(imageUrlRequest: ImageUrlRequest): Image {
+        val fileName = imageUrlRequest.fileName!!
+        val uuid = imageUrlRequest.uuid!!
+        val extensionIndex = fileName.lastIndexOf('.')
+        val mimeType = "image/${fileName.substring(extensionIndex + 1)}"
+        val title = fileName.substring(0, extensionIndex)
+        return Image(uuid, title, fileName, mimeType, null, null)
+    }
+
+    abstract fun updateModel(imageRequest: UpdateImageRequest, @MappingTarget image: Image)
 }

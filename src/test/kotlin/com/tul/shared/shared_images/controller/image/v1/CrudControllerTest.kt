@@ -1,8 +1,10 @@
 package com.tul.shared.shared_images.controller.image.v1
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.tul.shared.shared_images.configuration.TestConfiguration
 import com.tul.shared.shared_images.configuration.TinifyMock
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
+import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -24,12 +26,15 @@ import java.util.UUID
 @SpringBootTest(classes = [TestConfiguration::class])
 @ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CrudControllerTest {
 
     @Autowired
     private lateinit var client: WebTestClient
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     private var tinifyMock = TinifyMock(8090)
 
@@ -44,6 +49,7 @@ class CrudControllerTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     fun showImagesTest() {
         Thread.sleep(100)
         val initialSize = getAllImages().size
@@ -85,6 +91,30 @@ class CrudControllerTest {
             .uri("/v1/images")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun createImageFromUrlTest() {
+        val imageUrlRequest = ImageUrlRequest().apply {
+            uuid = UUID.randomUUID().toString()
+            fileName = "tul.png"
+            url = "https://tul.com.co/assets/Img/logo-tul.png"
+        }
+
+        client.post()
+            .uri("/v1/images/url")
+            .body(BodyInserters.fromValue(imageUrlRequest))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("uuid").isEqualTo(imageUrlRequest.uuid!!)
+            .jsonPath("file_name").isEqualTo("tul.png")
+
+        client.post()
+            .uri("/v1/images")
+            .body(BodyInserters.fromValue(imageUrlRequest))
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -194,5 +224,34 @@ class CrudControllerTest {
             .expectStatus().isOk
             .expectBody(Array<ImageDto>::class.java)
             .returnResult().responseBody!!
+    }
+
+    @Test
+    fun indexMultiple() {
+        val uuid = UUID.randomUUID().toString()
+        val title = "test"
+        val bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", uuid)
+        bodyBuilder.part("title", title)
+
+        client.post()
+            .uri("/v1/images")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(ImageDto::class.java).returnResult().responseBody
+
+        val response = client.post()
+            .uri("/v1/images/index/multiple")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(objectMapper.writeValueAsString(listOf(uuid))))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(Array<ImageDto>::class.java)
+            .returnResult().responseBody!!
+
+        Assertions.assertEquals(1, response.size)
     }
 }

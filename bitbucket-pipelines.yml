@@ -6,28 +6,67 @@ clone:
 pipelines:
   branches:
     develop:
+      - step:
+          name: Push imagen
+          services:
+            - docker
+          caches:
+            - gradle
+          script:
+            - gradle build -x lintKotlin -x test
+            - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
+            - TAG="${BITBUCKET_COMMIT}"
+            - docker build -t $REPO_SLUG .
+            - pipe: atlassian/aws-ecr-push-image:1.3.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ECR_KEY
+                AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET
+                AWS_DEFAULT_REGION: $AWS_ECR_DEV_REGION
+                IMAGE_NAME: $REPO_SLUG
+                TAGS: $TAG
       - parallel:
           - step:
-              name: Deploy on external.dev.soytul.com
+              name: Deploy on api.co.dev.soytul.com
               services:
                 - docker
               caches:
                 - gradle
               script:
-                - gradle build -x lintKotlin -x test
                 - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
                 - TAG="${BITBUCKET_COMMIT}"
-                - docker build -t $REPO_SLUG .
-                - pipe: atlassian/aws-ecr-push-image:1.2.2
-                  variables:
-                    AWS_ACCESS_KEY_ID: $AWS_ECR_KEY
-                    AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET
-                    AWS_DEFAULT_REGION: $AWS_ECR_DEV_REGION
-                    IMAGE_NAME: $REPO_SLUG
-                    TAGS: $TAG
                 - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v1.7.11/argocd-linux-amd64
                 - chmod +x argocd
                 - ARGO_NAME="dev-${REPO_SLUG}"
+                - ./argocd login ${ARGOS_DEV_URL} --username ${ARGOS_DEV_USER} --password ${ARGOS_DEV_PASSWORD} --insecure
+                - ./argocd app set $ARGO_NAME -p image.tag=$TAG
+                - ./argocd app sync $ARGO_NAME
+          - step:
+              name: Deploy on api.ec.dev.soytul.com
+              services:
+                - docker
+              caches:
+                - gradle
+              script:
+                - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
+                - TAG="${BITBUCKET_COMMIT}"
+                - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v1.7.11/argocd-linux-amd64
+                - chmod +x argocd
+                - ARGO_NAME="dev-ec-${REPO_SLUG}"
+                - ./argocd login ${ARGOS_DEV_URL} --username ${ARGOS_DEV_USER} --password ${ARGOS_DEV_PASSWORD} --insecure
+                - ./argocd app set $ARGO_NAME -p image.tag=$TAG
+                - ./argocd app sync $ARGO_NAME
+          - step:
+              name: Deploy on api.mx.dev.soytul.com
+              services:
+                - docker
+              caches:
+                - gradle
+              script:
+                - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
+                - TAG="${BITBUCKET_COMMIT}"
+                - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v1.7.11/argocd-linux-amd64
+                - chmod +x argocd
+                - ARGO_NAME="dev-mx-${REPO_SLUG}"
                 - ./argocd login ${ARGOS_DEV_URL} --username ${ARGOS_DEV_USER} --password ${ARGOS_DEV_PASSWORD} --insecure
                 - ./argocd app set $ARGO_NAME -p image.tag=$TAG
                 - ./argocd app sync $ARGO_NAME
@@ -51,7 +90,7 @@ pipelines:
             - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
             - TAG="${BITBUCKET_COMMIT}"
             - docker build -t $REPO_SLUG .
-            - pipe: atlassian/aws-ecr-push-image:1.2.2
+            - pipe: atlassian/aws-ecr-push-image:1.3.0
               variables:
                 AWS_ACCESS_KEY_ID: $AWS_ECR_KEY_PROD
                 AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET_PROD
@@ -60,7 +99,7 @@ pipelines:
                 TAGS: $TAG
       - parallel:
           - step:
-              name: Deploy on api.soytul.com.co
+              name: Deploy on api.tul.com.co
               script:
                 - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
                 - TAG="${BITBUCKET_COMMIT}"
@@ -71,7 +110,7 @@ pipelines:
                 - ./argocd app set $ARGO_NAME -p image.tag=$TAG
                 - ./argocd app sync $ARGO_NAME
           - step:
-              name: Deploy on api.soytul.com.ec
+              name: Deploy on api.tul.com.ec
               script:
                 - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
                 - TAG="${BITBUCKET_COMMIT}"
@@ -82,7 +121,7 @@ pipelines:
                 - ./argocd app set $ARGO_NAME -p image.tag=$TAG
                 - ./argocd app sync $ARGO_NAME
           - step:
-              name: Deploy on api.soytul.com.mx
+              name: Deploy on api.tul.com.mx
               script:
                 - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
                 - TAG="${BITBUCKET_COMMIT}"

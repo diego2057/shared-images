@@ -3,6 +3,7 @@ package com.tul.shared.shared_images.controller.image.v1
 import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
+import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreate
 import com.tul.shared.shared_images.dto.request.OnUpdate
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
@@ -48,6 +50,14 @@ class CrudController(
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
+    @PostMapping("/url")
+    fun createFromUrl(
+        @Validated(OnCreate::class) @RequestBody imageUrlRequest: ImageUrlRequest
+    ): Mono<ResponseEntity<ImageDto>> {
+        return imageCrudService.saveImageFromUrl(imageUrlRequest)
+            .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
+    }
+
     @PatchMapping("/{id}")
     fun update(
         @PathVariable id: String,
@@ -62,5 +72,10 @@ class CrudController(
     fun delete(@PathVariable id: String): Mono<ResponseEntity<Void>> {
         return imageCrudService.delete(id)
             .thenReturn(ResponseEntity.noContent().build())
+    }
+
+    @PostMapping("/index/multiple")
+    fun indexMultiple(@RequestBody listIds: List<String>): ResponseEntity<Flux<ImageDto>> {
+        return ResponseEntity.ok().body(imageCrudService.findIndexMultiple(listIds).map { imageMapper.toDto(it) })
     }
 }

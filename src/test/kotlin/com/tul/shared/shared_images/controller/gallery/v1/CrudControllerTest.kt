@@ -24,7 +24,7 @@ import java.util.UUID
 @SpringBootTest(classes = [TestConfiguration::class])
 @ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CrudControllerTest {
     @Autowired
@@ -43,6 +43,7 @@ class CrudControllerTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     fun showGalleryTest() {
         var galleryDtoArray = client.get()
             .uri("/v1/galleries")
