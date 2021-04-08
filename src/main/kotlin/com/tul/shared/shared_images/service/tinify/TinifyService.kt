@@ -1,16 +1,20 @@
 package com.tul.shared.shared_images.service.tinify
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.netty.handler.logging.LogLevel
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import reactor.netty.http.client.HttpClient
+import reactor.netty.transport.logging.AdvancedByteBufFormat
 import java.util.UUID
 
 @Component
@@ -30,6 +34,11 @@ class TinifyService(
 ) {
 
     private val webClient = WebClient.builder()
+        .clientConnector(
+            ReactorClientHttpConnector(
+                HttpClient.create().wiretap("reactor.netty.http.client.HttpClient", LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL)
+            )
+        )
         .baseUrl(tinifyUrl)
         .build()
 
