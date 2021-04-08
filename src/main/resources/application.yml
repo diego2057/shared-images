@@ -33,3 +33,16 @@ logging:
     org:
       springframework:
         cache: TRACE
+    reactor:
+      netty:
+        http:
+          client:
+            HttpClient: INFO
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    loggers:
+      enabled: true
