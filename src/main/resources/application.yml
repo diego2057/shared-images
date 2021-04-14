@@ -43,6 +43,5 @@ management:
     web:
       exposure:
         include: "*"
-  endpoint:
     loggers:
       enabled: true

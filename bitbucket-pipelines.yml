@@ -131,14 +131,14 @@ pipelines:
                 - ./argocd login ${ARGOS_PROD_URL} --username ${ARGOS_PROD_USER} --password ${ARGOS_PROD_PASSWORD} --insecure
                 - ./argocd app set $ARGO_NAME -p image.tag=$TAG
                 - ./argocd app sync $ARGO_NAME
-      - step:
-          name: Test
-          caches:
-            - gradle
-          script:
-            - gradle build jacocoTestReport sonarqube -x lintKotlin
-          artifacts:
-            - build/**
+          - step:
+              name: Test
+              caches:
+                - gradle
+              script:
+                - gradle build jacocoTestReport sonarqube -x lintKotlin
+              artifacts:
+                - build/**
   default:
     - parallel:
         - step:
