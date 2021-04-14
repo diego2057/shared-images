@@ -170,6 +170,29 @@ class CrudControllerTest {
     }
 
     @Test
+    fun updateNotExistGalleryTest() {
+        val uuid = UUID.randomUUID().toString()
+        val imageTitle = "test"
+        val file = ClassPathResource("test.png")
+
+        val bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("image", file, MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("title", imageTitle)
+
+        client.patch()
+            .uri("/v1/galleries/$uuid")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("uuid").isEqualTo(uuid)
+            .jsonPath("images[0].uuid").isNotEmpty
+            .jsonPath("images[0].title").isEqualTo(imageTitle)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
+    }
+
+    @Test
     fun deleteImageGalleryTest() {
         val uuid = UUID.randomUUID().toString()
         val imageTitle = "test"

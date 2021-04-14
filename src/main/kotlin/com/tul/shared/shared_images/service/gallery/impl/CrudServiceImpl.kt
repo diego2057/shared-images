@@ -57,6 +57,7 @@ class CrudServiceImpl(
             }
 
         return galleryRepository.findById(uuid)
+            .defaultIfEmpty(Gallery(uuid, mutableListOf()))
             .zipWith(monoImage)
             .doOnNext { it.t1.images?.add(it.t2) }
             .flatMap { galleryRepository.save(it.t1) }
