@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.ClassPathResource
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.test.annotation.DirtiesContext
@@ -209,10 +210,11 @@ class CrudControllerTest {
             .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
             .exchange()
             .expectStatus().isOk
-            .returnResult(GalleryDto::class.java)
-            .responseBody.next()
+            .expectBody(GalleryDto::class.java)
+            .returnResult()
+            .responseBody
 
-        response.doOnNext { imageUUID = it.images!![0].uuid!! }.block()
+        imageUUID = response?.images!![0].uuid!!
 
         imageTitle = "test-update"
         file = ClassPathResource("test.png")
@@ -274,5 +276,41 @@ class CrudControllerTest {
             .expectBody(GalleryDto::class.java).returnResult().responseBody
 
         Assertions.assertEquals(galleryDto?.images?.size, 1)
+    }
+
+    @Test
+    fun deleteManyImagesGalleryTest() {
+        val uuid = UUID.randomUUID().toString()
+        val imageTitle = "test"
+        val file = ClassPathResource("test.png")
+        val bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("images[0].title", imageTitle)
+        bodyBuilder.part("images[1].image", file, MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("images[1].title", imageTitle + "2")
+        bodyBuilder.part("uuid", uuid)
+
+        var galleryDto = client.post()
+            .uri("/v1/galleries")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(GalleryDto::class.java).returnResult().responseBody
+
+        Assertions.assertEquals(galleryDto?.images?.size, 2)
+
+        val imageUuid1 = galleryDto?.images?.get(0)?.uuid
+        val imageUuid2 = galleryDto?.images?.get(1)?.uuid
+
+        galleryDto = client
+            .method(HttpMethod.DELETE)
+            .uri("/v1/galleries/$uuid")
+            .bodyValue(listOf(imageUuid1, imageUuid2))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(GalleryDto::class.java).returnResult().responseBody
+
+        Assertions.assertEquals(galleryDto?.images?.size, 0)
     }
 }

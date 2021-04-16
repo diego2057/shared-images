@@ -13,5 +13,6 @@ interface CrudService {
     fun save(galleryRequest: RestGalleryRequest): Mono<Gallery>
     fun addImage(uuid: String, imageRequest: UpdateImageRequest): Mono<Gallery>
     fun update(uuid: String, images: List<CreateImageRequest>): Mono<Gallery>
+    fun deleteImages(uuid: String, imagesUuid: List<String>): Mono<Gallery>
     fun deleteImage(uuid: String, imageUuid: String): Mono<Gallery>
 }

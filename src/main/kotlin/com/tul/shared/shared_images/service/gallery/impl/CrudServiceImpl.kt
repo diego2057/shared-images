@@ -88,12 +88,16 @@ class CrudServiceImpl(
         }
     }
 
-    override fun deleteImage(uuid: String, imageUuid: String): Mono<Gallery> {
+    override fun deleteImages(uuid: String, imagesUuid: List<String>): Mono<Gallery> {
         return galleryRepository.findById(uuid)
             .flatMap {
-                it.images.removeIf { image -> image.uuid == imageUuid }
+                it.images.removeIf { image -> imagesUuid.contains(image.uuid) }
                 galleryRepository.save(it)
             }
+    }
+
+    override fun deleteImage(uuid: String, imageUuid: String): Mono<Gallery> {
+        return deleteImages(uuid, listOf(imageUuid))
     }
 
     private fun storeImage(image: Image, jsonNode: JsonNode, galleryUUID: String): Mono<Image> {

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
@@ -74,6 +75,15 @@ class CrudController(
         @PathVariable imageId: String
     ): Mono<ResponseEntity<GalleryDto>> {
         return galleryCrudService.deleteImage(id, imageId)
+            .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteImages(
+        @PathVariable id: String,
+        @RequestBody imagesUuid: List<String>
+    ): Mono<ResponseEntity<GalleryDto>> {
+        return galleryCrudService.deleteImages(id, imagesUuid)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 }
