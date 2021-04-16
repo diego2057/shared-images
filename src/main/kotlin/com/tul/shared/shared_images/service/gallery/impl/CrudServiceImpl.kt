@@ -9,6 +9,7 @@ import com.tul.shared.shared_images.model.Gallery
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.gallery.CrudRepository
 import com.tul.shared.shared_images.service.tinify.TinifyService
+import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -39,7 +40,7 @@ class CrudServiceImpl(
                 val image = imageMapper.toModel(imageRequest)
                 val file = imageRequest.image!!
                 image.fileName = file.filename()
-                image.mimeType = file.headers().getFirst("Content-Type")
+                image.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
                 tinifyService.compressImage(file).flatMap { storeImage(image, it, gallery.uuid) }
             }
             .collectList()
@@ -53,7 +54,7 @@ class CrudServiceImpl(
             .flatMap {
                 val file = imageRequest.image!!
                 it.fileName = file.filename()
-                it.mimeType = file.headers().getFirst("Content-Type")
+                it.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
                 tinifyService.compressImage(file).flatMap { json -> storeImage(it, json, uuid) }
             }
             .zipWith(galleryRepository.findById(uuid).defaultIfEmpty(Gallery(uuid, mutableListOf())))
@@ -77,7 +78,7 @@ class CrudServiceImpl(
                     val file = imageRequest.image
                     if (file != null) {
                         image.fileName = file.filename()
-                        image.mimeType = file.headers().getFirst("Content-Type")
+                        image.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
                         monoImage = tinifyService.compressImage(file).flatMap { json -> storeImage(image, json, gallery.uuid) }
                     }
                 }
