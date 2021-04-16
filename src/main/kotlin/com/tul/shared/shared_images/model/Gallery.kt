@@ -13,5 +13,5 @@ data class Gallery(
 
     @Field("images")
     @NotNull
-    var images: MutableList<Image>?
+    var images: MutableList<Image> = mutableListOf()
 )

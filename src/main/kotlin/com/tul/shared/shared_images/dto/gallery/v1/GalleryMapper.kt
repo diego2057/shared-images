@@ -11,14 +11,13 @@ import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest as RestGallery
 @Mapper(
     componentModel = "spring",
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-    unmappedTargetPolicy = ReportingPolicy.IGNORE
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
 )
-interface GalleryMapper {
-    @Mappings
-    fun toDto(gallery: Gallery): GalleryDto
+abstract class GalleryMapper {
+    abstract fun toDto(gallery: Gallery): GalleryDto
 
     @Mappings(
-        Mapping(target = "images", ignore = true)
+        Mapping(target = "images", expression = "java(new java.util.ArrayList())")
     )
-    fun toModel(galleryRequest: RestGalleryRequest): Gallery
+    abstract fun toModel(galleryRequest: RestGalleryRequest): Gallery
 }

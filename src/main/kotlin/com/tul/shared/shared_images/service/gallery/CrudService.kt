@@ -1,5 +1,6 @@
 package com.tul.shared.shared_images.service.gallery
 
+import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Gallery
 import reactor.core.publisher.Flux
@@ -10,6 +11,8 @@ interface CrudService {
     fun findAll(): Flux<Gallery>
     fun findById(uuid: String): Mono<Gallery>
     fun save(galleryRequest: RestGalleryRequest): Mono<Gallery>
-    fun update(uuid: String, imageRequest: UpdateImageRequest): Mono<Gallery>
+    fun addImage(uuid: String, imageRequest: UpdateImageRequest): Mono<Gallery>
+    fun update(uuid: String, images: List<CreateImageRequest>): Mono<Gallery>
+    fun deleteImages(uuid: String, imagesUuid: List<String>): Mono<Gallery>
     fun deleteImage(uuid: String, imageUuid: String): Mono<Gallery>
 }

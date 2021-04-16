@@ -15,7 +15,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import reactor.netty.http.client.HttpClient
 import reactor.netty.transport.logging.AdvancedByteBufFormat
-import java.util.UUID
 
 @Component
 class TinifyService(
@@ -42,9 +41,7 @@ class TinifyService(
         .baseUrl(tinifyUrl)
         .build()
 
-    fun storeImage(url: String, fileName: String): Mono<String> {
-        val uuid = UUID.randomUUID().toString()
-        val name = UUID.nameUUIDFromBytes((fileName + uuid).encodeToByteArray())
+    fun storeImage(url: String, fileName: String, s3Name: String): Mono<String> {
         val extensionIndex = fileName.lastIndexOf('.')
         val extension = if (extensionIndex > 0) fileName.substring(extensionIndex) else ""
         val options = mapOf(
@@ -52,7 +49,7 @@ class TinifyService(
             "aws_access_key_id" to awsKeyId,
             "aws_secret_access_key" to awsSecretKey,
             "region" to region,
-            "path" to "$bucketPath/${name}$extension"
+            "path" to "$bucketPath/$s3Name$extension"
         )
 
         return webClient
