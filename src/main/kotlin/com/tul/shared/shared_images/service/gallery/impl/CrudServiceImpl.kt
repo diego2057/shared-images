@@ -2,6 +2,7 @@ package com.tul.shared.shared_images.service.gallery.impl
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
+import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Gallery
@@ -39,7 +40,7 @@ class CrudServiceImpl(
                 val file = imageRequest.image!!
                 image.fileName = file.filename()
                 image.mimeType = file.headers().getFirst("Content-Type")
-                tinifyService.compressImage(file).flatMap { storeImage(image, it) }
+                tinifyService.compressImage(file).flatMap { storeImage(image, it, gallery.uuid) }
             }
             .collectList()
             .doOnNext { gallery.images = it }
@@ -47,33 +48,57 @@ class CrudServiceImpl(
             .flatMap { galleryRepository.save(it) }
     }
 
-    override fun update(uuid: String, imageRequest: UpdateImageRequest): Mono<Gallery> {
-        val monoImage = Mono.just(imageRequest).map(imageMapper::toModel)
+    override fun addImage(uuid: String, imageRequest: UpdateImageRequest): Mono<Gallery> {
+        return Mono.just(imageRequest).map(imageMapper::toModel)
             .flatMap {
                 val file = imageRequest.image!!
                 it.fileName = file.filename()
                 it.mimeType = file.headers().getFirst("Content-Type")
-                tinifyService.compressImage(file).flatMap { json -> storeImage(it, json) }
+                tinifyService.compressImage(file).flatMap { json -> storeImage(it, json, uuid) }
             }
+            .zipWith(galleryRepository.findById(uuid).defaultIfEmpty(Gallery(uuid, mutableListOf())))
+            .doOnNext { it.t2.images.add(it.t1) }
+            .flatMap { galleryRepository.save(it.t2) }
+    }
 
-        return galleryRepository.findById(uuid)
-            .defaultIfEmpty(Gallery(uuid, mutableListOf()))
-            .zipWith(monoImage)
-            .doOnNext { it.t1.images?.add(it.t2) }
-            .flatMap { galleryRepository.save(it.t1) }
+    override fun update(uuid: String, images: List<CreateImageRequest>): Mono<Gallery> {
+        val galleryMono = galleryRepository.findById(uuid).defaultIfEmpty(Gallery(uuid, mutableListOf()))
+        val imageFlux = Flux.fromStream(images.stream())
+        return galleryMono.flatMap { gallery ->
+            imageFlux.flatMap { imageRequest ->
+                var image = gallery.images.find { image -> image.uuid == imageRequest.uuid!! }
+                if (image == null && imageRequest.image != null && imageRequest.title != null) {
+                    image = imageMapper.toModel(imageRequest)
+                    gallery.images.add(image)
+                }
+                var monoImage = Mono.justOrEmpty(image)
+                if (image != null) {
+                    imageMapper.updateModel(imageRequest, image)
+                    val file = imageRequest.image
+                    if (file != null) {
+                        image.fileName = file.filename()
+                        image.mimeType = file.headers().getFirst("Content-Type")
+                        monoImage = tinifyService.compressImage(file).flatMap { json -> storeImage(image, json, gallery.uuid) }
+                    }
+                }
+                monoImage
+            }
+                .then(Mono.just(gallery))
+                .flatMap(galleryRepository::save)
+        }
     }
 
     override fun deleteImage(uuid: String, imageUuid: String): Mono<Gallery> {
         return galleryRepository.findById(uuid)
             .flatMap {
-                it.images?.removeIf { image -> image.uuid == imageUuid }
+                it.images.removeIf { image -> image.uuid == imageUuid }
                 galleryRepository.save(it)
             }
     }
 
-    private fun storeImage(image: Image, jsonNode: JsonNode): Mono<Image> {
+    private fun storeImage(image: Image, jsonNode: JsonNode, galleryUUID: String): Mono<Image> {
         image.size = jsonNode.get("input").get("size").asLong()
-        return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), image.fileName!!)
+        return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), image.fileName!!, "${image.uuid}-$galleryUUID")
             .doOnNext { image.url = it }
             .thenReturn(image)
     }

@@ -35,4 +35,6 @@ abstract class ImageMapper {
     }
 
     abstract fun updateModel(imageRequest: UpdateImageRequest, @MappingTarget image: Image)
+
+    abstract fun updateModel(imageRequest: CreateImageRequest, @MappingTarget image: Image)
 }

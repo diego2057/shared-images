@@ -3,6 +3,7 @@ package com.tul.shared.shared_images.controller.gallery.v1
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryDto
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest
+import com.tul.shared.shared_images.dto.gallery.v1.UpdateGalleryRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreateGallery
 import com.tul.shared.shared_images.service.gallery.CrudService
@@ -48,13 +49,22 @@ class CrudController(
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
-    @PatchMapping("/{id}")
-    fun update(
+    @PatchMapping("/{id}/images")
+    fun addImage(
         @Validated(OnCreateGallery::class)
         @ModelAttribute imageRequest: UpdateImageRequest,
         @PathVariable id: String
     ): Mono<ResponseEntity<GalleryDto>> {
-        return galleryCrudService.update(id, imageRequest)
+        return galleryCrudService.addImage(id, imageRequest)
+            .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
+    }
+
+    @PatchMapping("/{id}")
+    fun update(
+        @ModelAttribute gallery: UpdateGalleryRequest,
+        @PathVariable id: String
+    ): Mono<ResponseEntity<GalleryDto>> {
+        return galleryCrudService.update(id, gallery.images)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
