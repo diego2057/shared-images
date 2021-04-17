@@ -227,6 +227,8 @@ class CrudControllerTest {
         bodyBuilder.part("images[2].image", file, MediaType.MULTIPART_FORM_DATA)
         bodyBuilder.part("images[2].title", "$imageTitle-2")
         bodyBuilder.part("images[2].uuid", UUID.randomUUID().toString())
+        bodyBuilder.part("images[3].image", file, MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("images[3].title", "$imageTitle-3")
 
         client.patch()
             .uri("/v1/galleries/$uuid")
@@ -242,7 +244,9 @@ class CrudControllerTest {
             .jsonPath("images[1].uuid").isNotEmpty
             .jsonPath("images[1].title").isEqualTo("$imageTitle-2")
             .jsonPath("images[1].file_name").isEqualTo(file.filename!!)
-            .jsonPath("images.length()").isEqualTo(2)
+            .jsonPath("images[2].title").isEqualTo("$imageTitle-3")
+            .jsonPath("images[2].file_name").isEqualTo(file.filename!!)
+            .jsonPath("images.length()").isEqualTo(3)
     }
 
     @Test

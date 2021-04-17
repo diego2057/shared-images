@@ -17,7 +17,9 @@ abstract class ImageMapper {
     @Mappings
     abstract fun toDto(image: Image): ImageDto
 
-    @Mappings
+    @Mappings(
+        Mapping(target = "uuid", defaultExpression = "java(java.util.UUID.randomUUID().toString())")
+    )
     abstract fun toModel(imageRequest: CreateImageRequest): Image
 
     @Mappings(
