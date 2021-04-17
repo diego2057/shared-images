@@ -67,7 +67,7 @@ class CrudServiceImpl(
         val imageFlux = Flux.fromStream(images.stream())
         return galleryMono.flatMap { gallery ->
             imageFlux.flatMap { imageRequest ->
-                var image = gallery.images.find { image -> image.uuid == imageRequest.uuid!! }
+                var image = imageRequest.uuid?.let { gallery.images.find { image -> image.uuid == it } }
                 if (image == null && imageRequest.image != null && imageRequest.title != null) {
                     image = imageMapper.toModel(imageRequest)
                     gallery.images.add(image)
