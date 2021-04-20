@@ -9,6 +9,7 @@ import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.CrudService
 import com.tul.shared.shared_images.service.tinify.TinifyService
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -39,7 +40,7 @@ class CrudServiceImpl(
         val image = imageMapper.toModel(imageRequest)
         val file = imageRequest.image!!
         image.fileName = file.filename()
-        image.mimeType = file.headers().getFirst("Content-Type")
+        image.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
         return imageCrudRepository.findById(imageRequest.uuid!!)
             .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageRequest.uuid} already exists") }
             .switchIfEmpty(
@@ -75,7 +76,7 @@ class CrudServiceImpl(
                 val file = imageRequest.image
                 if (file != null) {
                     it.fileName = file.filename()
-                    it.mimeType = file.headers().getFirst("Content-Type")
+                    it.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
                     tinifyService.compressImage(file).flatMap { json -> storeImage(it, json) }
                 } else {
                     imageCrudRepository.save(it)
@@ -91,7 +92,7 @@ class CrudServiceImpl(
 
     private fun storeImage(image: Image, jsonNode: JsonNode): Mono<Image> {
         image.size = jsonNode.get("input").get("size").asLong()
-        return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), image.fileName!!)
+        return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), image.fileName!!, image.uuid)
             .flatMap {
                 image.url = it
                 imageCrudRepository.save(image)

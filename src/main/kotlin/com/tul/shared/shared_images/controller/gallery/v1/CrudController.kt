@@ -3,6 +3,7 @@ package com.tul.shared.shared_images.controller.gallery.v1
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryDto
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest
+import com.tul.shared.shared_images.dto.gallery.v1.UpdateGalleryRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreateGallery
 import com.tul.shared.shared_images.service.gallery.CrudService
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
@@ -48,13 +50,22 @@ class CrudController(
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
-    @PatchMapping("/{id}")
-    fun update(
+    @PatchMapping("/{id}/images")
+    fun addImage(
         @Validated(OnCreateGallery::class)
         @ModelAttribute imageRequest: UpdateImageRequest,
         @PathVariable id: String
     ): Mono<ResponseEntity<GalleryDto>> {
-        return galleryCrudService.update(id, imageRequest)
+        return galleryCrudService.addImage(id, imageRequest)
+            .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
+    }
+
+    @PatchMapping("/{id}")
+    fun update(
+        @ModelAttribute gallery: UpdateGalleryRequest,
+        @PathVariable id: String
+    ): Mono<ResponseEntity<GalleryDto>> {
+        return galleryCrudService.update(id, gallery.images)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
@@ -64,6 +75,15 @@ class CrudController(
         @PathVariable imageId: String
     ): Mono<ResponseEntity<GalleryDto>> {
         return galleryCrudService.deleteImage(id, imageId)
+            .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteImages(
+        @PathVariable id: String,
+        @RequestBody imagesUuid: List<String>
+    ): Mono<ResponseEntity<GalleryDto>> {
+        return galleryCrudService.deleteImages(id, imagesUuid)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 }
