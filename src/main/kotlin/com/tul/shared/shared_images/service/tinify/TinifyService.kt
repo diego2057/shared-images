@@ -41,15 +41,13 @@ class TinifyService(
         .baseUrl(tinifyUrl)
         .build()
 
-    fun storeImage(url: String, fileName: String, s3Name: String): Mono<String> {
-        val extensionIndex = fileName.lastIndexOf('.')
-        val extension = if (extensionIndex > 0) fileName.substring(extensionIndex) else ""
+    fun storeImage(url: String, s3Name: String): Mono<String> {
         val options = mapOf(
             "service" to "s3",
             "aws_access_key_id" to awsKeyId,
             "aws_secret_access_key" to awsSecretKey,
             "region" to region,
-            "path" to "$bucketPath/$s3Name$extension"
+            "path" to "$bucketPath/$s3Name"
         )
 
         return webClient

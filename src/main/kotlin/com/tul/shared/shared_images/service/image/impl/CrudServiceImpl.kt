@@ -92,7 +92,7 @@ class CrudServiceImpl(
 
     private fun storeImage(image: Image, jsonNode: JsonNode): Mono<Image> {
         image.size = jsonNode.get("input").get("size").asLong()
-        return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), image.fileName!!, image.uuid)
+        return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), image.uuid)
             .flatMap {
                 image.url = it
                 imageCrudRepository.save(image)
