@@ -42,8 +42,6 @@ class TinifyService(
         .build()
 
     fun storeImage(url: String, s3Name: String): Mono<String> {
-        // val extensionIndex = fileName.lastIndexOf('.')
-        // val extension = if (extensionIndex > 0) fileName.substring(extensionIndex) else ""
         val options = mapOf(
             "service" to "s3",
             "aws_access_key_id" to awsKeyId,
