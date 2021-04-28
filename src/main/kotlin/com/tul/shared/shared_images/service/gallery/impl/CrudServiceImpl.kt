@@ -103,8 +103,14 @@ class CrudServiceImpl(
 
     private fun storeImage(image: Image, jsonNode: JsonNode, galleryUUID: String): Mono<Image> {
         image.size = jsonNode.get("input").get("size").asLong()
-        return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), image.fileName!!, "${image.uuid}-$galleryUUID")
+        return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), extensionName(image, galleryUUID))
             .doOnNext { image.url = it }
             .thenReturn(image)
+    }
+
+    private fun extensionName(image: Image, galleryUUID: String): String {
+        val extensionIndex = image.fileName!!.lastIndexOf('.')
+        val extension = if (extensionIndex > 0) image.fileName!!.substring(extensionIndex) else ""
+        return "${image.uuid}-$galleryUUID$extension"
     }
 }
