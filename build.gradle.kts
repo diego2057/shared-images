@@ -6,6 +6,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.0.10.RELEASE"
 	id("org.sonarqube") version "3.0"
 	id("org.jmailen.kotlinter") version "3.3.0"
+	id("com.gorylenko.gradle-git-properties") version "2.2.4"
 	kotlin("jvm") version "1.4.21"
 	kotlin("plugin.spring") version "1.4.21"
 	kotlin("kapt") version "1.4.20"
@@ -32,6 +33,8 @@ dependencies {
 	implementation("io.projectreactor.kafka:reactor-kafka:1.3.1")
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation ("io.springfox:springfox-boot-starter:3.0.0")
+	implementation("io.sentry:sentry-spring-boot-starter:4.3.0")
+	implementation("io.sentry:sentry-logback:4.3.0")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	api("org.mapstruct:mapstruct:1.4.1.Final")
 	kapt("org.mapstruct:mapstruct-processor:1.4.1.Final")
