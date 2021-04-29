@@ -68,7 +68,7 @@ class CrudServiceImpl(
         return galleryMono.flatMap { gallery ->
             imageFlux.flatMap { imageRequest ->
                 var image = imageRequest.uuid?.let { gallery.images.find { image -> image.uuid == it } }
-                if (image == null && imageRequest.image != null && imageRequest.title != null) {
+                if (image == null && imageRequest.image != null) {
                     image = imageMapper.toModel(imageRequest)
                     gallery.images.add(image)
                 }

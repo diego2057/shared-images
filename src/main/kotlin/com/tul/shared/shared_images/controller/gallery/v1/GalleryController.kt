@@ -7,6 +7,7 @@ import com.tul.shared.shared_images.dto.gallery.v1.UpdateGalleryRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreateGallery
 import com.tul.shared.shared_images.service.gallery.CrudService
+import io.swagger.annotations.Api
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -25,7 +26,8 @@ import reactor.core.publisher.Mono
 
 @RestController("gallery.crud")
 @RequestMapping("v1/galleries")
-class CrudController(
+@Api(tags = ["gallery", "crud"])
+class GalleryController(
     private val galleryCrudService: CrudService,
     private val galleryMapper: GalleryMapper
 ) {

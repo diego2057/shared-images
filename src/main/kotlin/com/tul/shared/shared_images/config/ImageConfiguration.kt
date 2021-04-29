@@ -23,7 +23,6 @@ class ImageConfiguration(
         val image = imageMapper.toModel(
             CreateImageRequest().apply {
                 uuid = defaultImageId
-                title = "default"
             }
         )
 

@@ -11,10 +11,6 @@ data class Image(
     @NotNull
     var uuid: String,
 
-    @Field("title")
-    @NotNull
-    var title: String,
-
     @Field("file_name")
     @NotNull
     var fileName: String?,

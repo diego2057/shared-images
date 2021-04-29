@@ -6,7 +6,5 @@ import javax.validation.constraints.NotNull
 
 class UpdateImageRequest {
     @NotNull(groups = [OnCreateGallery::class])
-    var title: String? = null
-    @NotNull(groups = [OnCreateGallery::class])
     var image: FilePart? = null
 }

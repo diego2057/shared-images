@@ -8,6 +8,7 @@ import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreate
 import com.tul.shared.shared_images.dto.request.OnUpdate
 import com.tul.shared.shared_images.service.image.CrudService
+import io.swagger.annotations.Api
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -26,7 +27,8 @@ import reactor.core.publisher.Mono
 
 @RestController("image.crud")
 @RequestMapping("v1/images")
-class CrudController(
+@Api(tags = ["Image", "crud"])
+class ImageController(
     private val imageCrudService: CrudService,
     private val imageMapper: ImageMapper
 ) {
@@ -57,6 +59,15 @@ class CrudController(
         return imageCrudService.saveImageFromUrl(imageUrlRequest)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
+
+//    @PostMapping("/{uuid}/url")
+//    fun createFromImageUuid(
+//        @PathVariable uuid: UUID,
+//        @Validated(OnCreate::class) @RequestBody imageUrlRequest: ImageUrlRequest
+//    ): Mono<ResponseEntity<ImageDto>> {
+//        return imageCrudService.saveFromImageUuid(uuid, imageUrlRequest)
+//            .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
+//    }
 
     @PatchMapping("/{id}")
     fun update(
