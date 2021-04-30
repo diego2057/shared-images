@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest as RestGalleryRequest
 
-interface CrudService {
+interface GalleryService {
     fun findAll(): Flux<Gallery>
     fun findById(uuid: String): Mono<Gallery>
     fun save(galleryRequest: RestGalleryRequest): Mono<Gallery>

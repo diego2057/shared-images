@@ -7,7 +7,7 @@ import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreate
 import com.tul.shared.shared_images.dto.request.OnUpdate
-import com.tul.shared.shared_images.service.image.CrudService
+import com.tul.shared.shared_images.service.image.ImageService
 import io.swagger.annotations.Api
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -29,17 +29,17 @@ import reactor.core.publisher.Mono
 @RequestMapping("v1/images")
 @Api(tags = ["Image", "crud"])
 class ImageController(
-    private val imageCrudService: CrudService,
+    private val imageService: ImageService,
     private val imageMapper: ImageMapper
 ) {
     @GetMapping
     fun index(): ResponseEntity<Flux<ImageDto>> {
-        return ResponseEntity.ok().body(imageCrudService.findAll().map { imageMapper.toDto(it) })
+        return ResponseEntity.ok().body(imageService.findAll().map { imageMapper.toDto(it) })
     }
 
     @GetMapping("/{id}")
     fun show(@PathVariable id: String): Mono<ResponseEntity<ImageDto>> {
-        return imageCrudService.findById(id)
+        return imageService.findById(id)
             .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
@@ -48,7 +48,7 @@ class ImageController(
     fun create(
         @Validated(OnCreate::class) @ModelAttribute createImageRequest: CreateImageRequest
     ): Mono<ResponseEntity<ImageDto>> {
-        return imageCrudService.save(createImageRequest)
+        return imageService.save(createImageRequest)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
@@ -56,18 +56,18 @@ class ImageController(
     fun createFromUrl(
         @Validated(OnCreate::class) @RequestBody imageUrlRequest: ImageUrlRequest
     ): Mono<ResponseEntity<ImageDto>> {
-        return imageCrudService.saveImageFromUrl(imageUrlRequest)
+        return imageService.saveImageFromUrl(imageUrlRequest)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
-//    @PostMapping("/{uuid}/url")
-//    fun createFromImageUuid(
-//        @PathVariable uuid: UUID,
-//        @Validated(OnCreate::class) @RequestBody imageUrlRequest: ImageUrlRequest
-//    ): Mono<ResponseEntity<ImageDto>> {
-//        return imageCrudService.saveFromImageUuid(uuid, imageUrlRequest)
-//            .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
-//    }
+    @PostMapping("/{uuid}/url")
+    fun createFromImageUuid(
+        @PathVariable uuid: String,
+        @Validated(OnCreate::class) @RequestBody imageUrlRequest: ImageUrlRequest
+    ): Mono<ResponseEntity<ImageDto>> {
+        return imageService.saveFromImageUuid(uuid, imageUrlRequest)
+            .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
+    }
 
     @PatchMapping("/{id}")
     fun update(
@@ -75,18 +75,18 @@ class ImageController(
         @Validated(OnUpdate::class) @ModelAttribute updateImageRequest: UpdateImageRequest
 
     ): Mono<ResponseEntity<ImageDto>> {
-        return imageCrudService.update(updateImageRequest, id)
+        return imageService.update(updateImageRequest, id)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: String): Mono<ResponseEntity<Void>> {
-        return imageCrudService.delete(id)
+        return imageService.delete(id)
             .thenReturn(ResponseEntity.noContent().build())
     }
 
     @PostMapping("/index/multiple")
     fun indexMultiple(@RequestBody listIds: List<String>): ResponseEntity<Flux<ImageDto>> {
-        return ResponseEntity.ok().body(imageCrudService.findIndexMultiple(listIds).map { imageMapper.toDto(it) })
+        return ResponseEntity.ok().body(imageService.findIndexMultiple(listIds).map { imageMapper.toDto(it) })
     }
 }

@@ -117,6 +117,30 @@ class ImageControllerTest {
     }
 
     @Test
+    fun createFromImageUuidTest() {
+        val imageUrlRequest = ImageUrlRequest().apply {
+            uuid = UUID.randomUUID().toString()
+            fileName = "tul.png"
+            url = "https://tul.com.co/assets/Img/logo-tul.png"
+        }
+
+        client.post()
+            .uri("/v1/images/${imageUrlRequest.uuid}/url")
+            .body(BodyInserters.fromValue(imageUrlRequest))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("uuid").isEqualTo(imageUrlRequest.uuid!!)
+            .jsonPath("file_name").isEqualTo("tul.png")
+
+        client.post()
+            .uri("/v1/images")
+            .body(BodyInserters.fromValue(imageUrlRequest))
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
+    @Test
     fun findImageByIdTest() {
         val uuid = UUID.randomUUID().toString()
         val bodyBuilder = MultipartBodyBuilder()

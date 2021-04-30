@@ -7,7 +7,7 @@ import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.image.CrudRepository
-import com.tul.shared.shared_images.service.image.CrudService
+import com.tul.shared.shared_images.service.image.ImageService
 import com.tul.shared.shared_images.service.tinify.TinifyService
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -20,12 +20,12 @@ import reactor.core.publisher.Mono
 import java.util.UUID
 
 @Service("image.crud_service")
-class CrudServiceImpl(
+class ImageServiceImpl(
     private val imageCrudRepository: CrudRepository,
     private val tinifyService: TinifyService,
     private val imageMapper: ImageMapper,
     private val webClient: WebClient
-) : CrudService {
+) : ImageService {
 
     override fun findAll(): Flux<Image> {
         return imageCrudRepository.findAll()
@@ -60,16 +60,16 @@ class CrudServiceImpl(
             )
     }
 
-//    override fun saveFromImageUuid(imageUuid: UUID, imageUrlRequest: ImageUrlRequest): Mono<Image> {
-//        val image = imageMapper.toModel(imageUrlRequest)
-//        return imageCrudRepository.findById(imageUrlRequest.uuid!!)
-//            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageUrlRequest.uuid} already exists") }
-//            .switchIfEmpty(
-//                getImageFromUrl(imageUrlRequest.url!!)
-//                    .flatMap { tinifyService.compressImage(it) }
-//                    .flatMap { storeImage(image, it) }
-//            )
-//    }
+    override fun saveFromImageUuid(imageUuid: String, imageUrlRequest: ImageUrlRequest): Mono<Image> {
+        val image = imageMapper.toModel(imageUrlRequest)
+        return imageCrudRepository.findById(imageUuid)
+            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageUrlRequest.uuid} already exists") }
+            .switchIfEmpty(
+                getImageFromUrl(imageUrlRequest.url!!)
+                    .flatMap { tinifyService.compressImage(it) }
+                    .flatMap { storeImage(image, it) }
+            )
+    }
 
     override fun saveDefaultImage(image: Image, byteArray: ByteArray) {
         imageCrudRepository.findById(image.uuid)
