@@ -28,7 +28,7 @@ import java.util.UUID
 @AutoConfigureWebTestClient
 @DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CrudControllerTest {
+class ImageControllerTest {
 
     @Autowired
     private lateinit var client: WebTestClient
@@ -56,7 +56,6 @@ class CrudControllerTest {
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
         bodyBuilder.part("uuid", UUID.randomUUID().toString())
-        bodyBuilder.part("title", "test")
 
         client.post()
             .uri("/v1/images")
@@ -71,11 +70,9 @@ class CrudControllerTest {
     @Test
     fun createImageTest() {
         val uuid = UUID.randomUUID().toString()
-        val title = "test"
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
         bodyBuilder.part("uuid", uuid)
-        bodyBuilder.part("title", title)
 
         client.post()
             .uri("/v1/images")
@@ -122,11 +119,9 @@ class CrudControllerTest {
     @Test
     fun findImageByIdTest() {
         val uuid = UUID.randomUUID().toString()
-        val title = "test"
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
         bodyBuilder.part("uuid", uuid)
-        bodyBuilder.part("title", title)
 
         val imageDto = client.post()
             .uri("/v1/images")
@@ -153,51 +148,31 @@ class CrudControllerTest {
             .exchange()
             .expectStatus().isOk
             .expectBody()
-            .jsonPath("title").isEqualTo("default")
             .jsonPath("url").isEqualTo("https://s3.us-east-2.amazonaws.com/images/default.jpeg")
     }
 
     @Test
     fun updateImageDataTest() {
         val uuid = UUID.randomUUID().toString()
-        var title = "test"
         var bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("uuid", uuid)
-        bodyBuilder.part("title", title)
-
-        val imageDto = client.post()
-            .uri("/v1/images")
-            .contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(ImageDto::class.java).returnResult().responseBody
-
-        title = "test-modified"
-        bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("title", title)
 
         client.patch()
-            .uri("/v1/images/${imageDto!!.uuid}")
+            .uri("/v1/images/$uuid")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
             .exchange()
             .expectStatus().isOk
             .expectBody()
-            .jsonPath("uuid").isEqualTo(imageDto.uuid!!)
-            .jsonPath("title").isEqualTo(title)
+            .jsonPath("uuid").isEqualTo(uuid)
     }
 
     @Test
     fun deleteImageTest() {
         val uuid = UUID.randomUUID().toString()
-        val title = "test"
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
         bodyBuilder.part("uuid", uuid)
-        bodyBuilder.part("title", title)
 
         client.post()
             .uri("/v1/images")
@@ -229,11 +204,9 @@ class CrudControllerTest {
     @Test
     fun indexMultiple() {
         val uuid = UUID.randomUUID().toString()
-        val title = "test"
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
         bodyBuilder.part("uuid", uuid)
-        bodyBuilder.part("title", title)
 
         client.post()
             .uri("/v1/images")
