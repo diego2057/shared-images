@@ -60,15 +60,6 @@ class ImageController(
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
-    @PostMapping("/{uuid}/url")
-    fun createFromImageUuid(
-        @PathVariable uuid: String,
-        @Validated(OnCreate::class) @RequestBody imageUrlRequest: ImageUrlRequest
-    ): Mono<ResponseEntity<ImageDto>> {
-        return imageService.saveFromImageUuid(uuid, imageUrlRequest)
-            .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
-    }
-
     @PatchMapping("/{id}")
     fun update(
         @PathVariable id: String,

@@ -51,24 +51,9 @@ class ImageServiceImpl(
 
     override fun saveImageFromUrl(imageUrlRequest: ImageUrlRequest): Mono<Image> {
         val image = imageMapper.toModel(imageUrlRequest)
-        return imageCrudRepository.findById(imageUrlRequest.uuid!!)
-            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageUrlRequest.uuid} already exists") }
-            .switchIfEmpty(
-                getImageFromUrl(imageUrlRequest.url!!)
-                    .flatMap { tinifyService.compressImage(it) }
-                    .flatMap { storeImage(image, it) }
-            )
-    }
-
-    override fun saveFromImageUuid(imageUuid: String, imageUrlRequest: ImageUrlRequest): Mono<Image> {
-        val image = imageMapper.toModel(imageUrlRequest)
-        return imageCrudRepository.findById(imageUuid)
-            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageUrlRequest.uuid} already exists") }
-            .switchIfEmpty(
-                getImageFromUrl(imageUrlRequest.url!!)
-                    .flatMap { tinifyService.compressImage(it) }
-                    .flatMap { storeImage(image, it) }
-            )
+        return getImageFromUrl(imageUrlRequest.url!!)
+            .flatMap { tinifyService.compressImage(it) }
+            .flatMap { storeImage(image, it) }
     }
 
     override fun saveDefaultImage(image: Image, byteArray: ByteArray) {
