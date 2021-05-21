@@ -6,7 +6,8 @@ import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest
 import com.tul.shared.shared_images.dto.gallery.v1.UpdateGalleryRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreateGallery
-import com.tul.shared.shared_images.service.gallery.CrudService
+import com.tul.shared.shared_images.service.gallery.GalleryService
+import io.swagger.annotations.Api
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -25,18 +26,19 @@ import reactor.core.publisher.Mono
 
 @RestController("gallery.crud")
 @RequestMapping("v1/galleries")
-class CrudController(
-    private val galleryCrudService: CrudService,
+@Api(tags = ["gallery", "crud"])
+class GalleryController(
+    private val galleryService: GalleryService,
     private val galleryMapper: GalleryMapper
 ) {
     @GetMapping
     fun index(): ResponseEntity<Flux<GalleryDto>> {
-        return ResponseEntity.ok().body(galleryCrudService.findAll().map { galleryMapper.toDto(it) })
+        return ResponseEntity.ok().body(galleryService.findAll().map { galleryMapper.toDto(it) })
     }
 
     @GetMapping("/{id}")
     fun show(@PathVariable id: String): Mono<ResponseEntity<GalleryDto>> {
-        return galleryCrudService.findById(id)
+        return galleryService.findById(id)
             .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
@@ -46,7 +48,7 @@ class CrudController(
         @Validated(OnCreateGallery::class)
         @ModelAttribute galleryRequest: GalleryRequest
     ): Mono<ResponseEntity<GalleryDto>> {
-        return galleryCrudService.save(galleryRequest)
+        return galleryService.save(galleryRequest)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
@@ -56,7 +58,7 @@ class CrudController(
         @ModelAttribute imageRequest: UpdateImageRequest,
         @PathVariable id: String
     ): Mono<ResponseEntity<GalleryDto>> {
-        return galleryCrudService.addImage(id, imageRequest)
+        return galleryService.addImage(id, imageRequest)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
@@ -65,7 +67,7 @@ class CrudController(
         @ModelAttribute gallery: UpdateGalleryRequest,
         @PathVariable id: String
     ): Mono<ResponseEntity<GalleryDto>> {
-        return galleryCrudService.update(id, gallery.images)
+        return galleryService.update(id, gallery.images)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
@@ -74,7 +76,7 @@ class CrudController(
         @PathVariable id: String,
         @PathVariable imageId: String
     ): Mono<ResponseEntity<GalleryDto>> {
-        return galleryCrudService.deleteImage(id, imageId)
+        return galleryService.deleteImage(id, imageId)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
@@ -83,7 +85,7 @@ class CrudController(
         @PathVariable id: String,
         @RequestBody imagesUuid: List<String>
     ): Mono<ResponseEntity<GalleryDto>> {
-        return galleryCrudService.deleteImages(id, imagesUuid)
+        return galleryService.deleteImages(id, imagesUuid)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 }

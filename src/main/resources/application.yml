@@ -9,7 +9,6 @@ app:
     region: ${AWS_REGION:${random.value}}
     bucket: ${OWN_BUCKET_NAME:app}
 sentry:
-  dsn: https://c002a4f52d214ca9b1519aa3316035ac@o549330.ingest.sentry.io/5740414
   enable-tracing: true
   traces-sample-rate: 0.3
 spring:

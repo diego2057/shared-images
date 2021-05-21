@@ -27,7 +27,7 @@ import java.util.UUID
 @AutoConfigureWebTestClient
 @DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CrudControllerTest {
+class GalleryControllerTest {
     @Autowired
     private lateinit var client: WebTestClient
 
@@ -57,7 +57,6 @@ class CrudControllerTest {
 
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[0].title", "test")
         bodyBuilder.part("uuid", UUID.randomUUID().toString())
 
         client.post()
@@ -80,11 +79,9 @@ class CrudControllerTest {
     @Test
     fun createGalleryTest() {
         val uuid = UUID.randomUUID().toString()
-        val imageTitle = "test"
         val file = ClassPathResource("test.png")
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[0].title", imageTitle)
         bodyBuilder.part("uuid", uuid)
 
         client.post()
@@ -96,18 +93,15 @@ class CrudControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].title").isEqualTo(imageTitle)
             .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
     }
 
     @Test
     fun findGalleryByIdTest() {
         val uuid = UUID.randomUUID().toString()
-        val imageTitle = "test"
         val file = ClassPathResource("test.png")
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[0].title", imageTitle)
         bodyBuilder.part("uuid", uuid)
 
         client.post()
@@ -124,18 +118,15 @@ class CrudControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].title").isEqualTo(imageTitle)
             .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
     }
 
     @Test
     fun addImageTest() {
         val uuid = UUID.randomUUID().toString()
-        val imageTitle = "test"
         val file = ClassPathResource("test.png")
         var bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[0].title", imageTitle)
         bodyBuilder.part("uuid", uuid)
 
         client.post()
@@ -147,12 +138,10 @@ class CrudControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].title").isEqualTo(imageTitle)
             .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
 
         bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("title", imageTitle + "2")
 
         client.patch()
             .uri("/v1/galleries/$uuid/images")
@@ -163,22 +152,18 @@ class CrudControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].title").isEqualTo(imageTitle)
             .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
             .jsonPath("images[1].uuid").isNotEmpty
-            .jsonPath("images[1].title").isEqualTo(imageTitle + "2")
             .jsonPath("images[1].file_name").isEqualTo(file.filename!!)
     }
 
     @Test
     fun addImageNotExistGalleryTest() {
         val uuid = UUID.randomUUID().toString()
-        val imageTitle = "test"
         val file = ClassPathResource("test.png")
 
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("title", imageTitle)
 
         client.patch()
             .uri("/v1/galleries/$uuid/images")
@@ -189,7 +174,6 @@ class CrudControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].title").isEqualTo(imageTitle)
             .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
     }
 
@@ -197,12 +181,10 @@ class CrudControllerTest {
     fun updateGalleryImagesTest() {
         val uuid = UUID.randomUUID().toString()
         var imageUUID = UUID.randomUUID().toString()
-        var imageTitle = "test"
         var file = ClassPathResource("default.jpeg")
 
         var bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("title", imageTitle)
 
         val response = client.patch()
             .uri("/v1/galleries/$uuid/images")
@@ -216,19 +198,14 @@ class CrudControllerTest {
 
         imageUUID = response?.images!![0].uuid!!
 
-        imageTitle = "test-update"
         file = ClassPathResource("test.png")
         bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[0].title", imageTitle)
         bodyBuilder.part("images[0].uuid", imageUUID)
         bodyBuilder.part("images[1].uuid", UUID.randomUUID().toString())
-        bodyBuilder.part("images[1].title", imageTitle)
         bodyBuilder.part("images[2].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[2].title", "$imageTitle-2")
         bodyBuilder.part("images[2].uuid", UUID.randomUUID().toString())
         bodyBuilder.part("images[3].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[3].title", "$imageTitle-3")
 
         client.patch()
             .uri("/v1/galleries/$uuid")
@@ -239,12 +216,9 @@ class CrudControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].title").isEqualTo(imageTitle)
             .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
             .jsonPath("images[1].uuid").isNotEmpty
-            .jsonPath("images[1].title").isEqualTo("$imageTitle-2")
             .jsonPath("images[1].file_name").isEqualTo(file.filename!!)
-            .jsonPath("images[2].title").isEqualTo("$imageTitle-3")
             .jsonPath("images[2].file_name").isEqualTo(file.filename!!)
             .jsonPath("images.length()").isEqualTo(3)
     }
@@ -252,13 +226,10 @@ class CrudControllerTest {
     @Test
     fun deleteImageGalleryTest() {
         val uuid = UUID.randomUUID().toString()
-        val imageTitle = "test"
         val file = ClassPathResource("test.png")
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[0].title", imageTitle)
         bodyBuilder.part("images[1].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[1].title", imageTitle + "2")
         bodyBuilder.part("uuid", uuid)
 
         var galleryDto = client.post()
@@ -285,13 +256,10 @@ class CrudControllerTest {
     @Test
     fun deleteManyImagesGalleryTest() {
         val uuid = UUID.randomUUID().toString()
-        val imageTitle = "test"
         val file = ClassPathResource("test.png")
         val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[0].title", imageTitle)
         bodyBuilder.part("images[1].image", file, MediaType.MULTIPART_FORM_DATA)
-        bodyBuilder.part("images[1].title", imageTitle + "2")
         bodyBuilder.part("uuid", uuid)
 
         var galleryDto = client.post()

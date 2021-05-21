@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest as RestGalleryRequest
-import com.tul.shared.shared_images.service.gallery.CrudService as GalleryService
+import com.tul.shared.shared_images.service.gallery.GalleryService as GalleryService
 
 @Service("gallery.crud_service")
-class CrudServiceImpl(
+class GalleryServiceImpl(
     private val galleryRepository: CrudRepository,
     private val tinifyService: TinifyService,
     private val imageMapper: ImageMapper,
@@ -68,7 +68,7 @@ class CrudServiceImpl(
         return galleryMono.flatMap { gallery ->
             imageFlux.flatMap { imageRequest ->
                 var image = imageRequest.uuid?.let { gallery.images.find { image -> image.uuid == it } }
-                if (image == null && imageRequest.image != null && imageRequest.title != null) {
+                if (image == null && imageRequest.image != null) {
                     image = imageMapper.toModel(imageRequest)
                     gallery.images.add(image)
                 }

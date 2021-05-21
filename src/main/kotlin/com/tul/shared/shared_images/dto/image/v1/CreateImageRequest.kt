@@ -8,7 +8,5 @@ class CreateImageRequest {
     @NotNull(groups = [OnCreate::class])
     var uuid: String? = null
     @NotNull(groups = [OnCreate::class])
-    var title: String? = null
-    @NotNull(groups = [OnCreate::class])
     var image: FilePart? = null
 }
