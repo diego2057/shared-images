@@ -49,7 +49,7 @@ class ClientGalleryControllerTest {
         bodyBuilder.part("uuid", uuid)
 
         client.post()
-            .uri("/_client/v1/galleries")
+            .uri("/v1/galleries")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
             .exchange()
