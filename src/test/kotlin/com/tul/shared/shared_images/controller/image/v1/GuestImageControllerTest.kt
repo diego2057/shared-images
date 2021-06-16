@@ -25,7 +25,7 @@ import java.util.UUID
 @AutoConfigureWebTestClient
 @DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ClientImageControllerTest {
+class GuestImageControllerTest {
 
     @Autowired
     private lateinit var client: WebTestClient
@@ -58,7 +58,7 @@ class ClientImageControllerTest {
             .expectBody(ImageDto::class.java).returnResult().responseBody
 
         client.get()
-            .uri("/_client/v1/images/$uuid")
+            .uri("/_guest/v1/images/$uuid")
             .header("security-uuid", UUID.randomUUID().toString())
             .exchange()
             .expectStatus().isOk
