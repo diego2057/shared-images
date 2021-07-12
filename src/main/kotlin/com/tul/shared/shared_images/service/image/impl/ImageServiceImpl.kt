@@ -116,7 +116,7 @@ class ImageServiceImpl(
                 .accept(MediaType.ALL)
                 .retrieve()
                 .bodyToMono(ByteArray::class.java)
-        }catch (e: Exception){
+        } catch (e: Exception) {
             log.warn(e.toString())
             throw e
         }
