@@ -117,8 +117,8 @@ class ImageServiceImpl(
                 .retrieve()
                 .bodyToMono(ByteArray::class.java)
         } catch (e: Exception) {
-            log.warn(e.toString())
-            throw e
+            log.warn(e.message)
+            throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY)
         }
     }
 }
