@@ -32,7 +32,8 @@ abstract class ImageMapper {
         val uuid = imageUrlRequest.uuid!!
         val extensionIndex = fileName.lastIndexOf('.')
         val mimeType = "image/${fileName.substring(extensionIndex + 1)}"
-        return Image(uuid, fileName, mimeType, null, null)
+        val url = imageUrlRequest.url
+        return Image(uuid, fileName, mimeType, null, url)
     }
 
     abstract fun updateModel(imageRequest: UpdateImageRequest, @MappingTarget image: Image)
