@@ -56,7 +56,7 @@ class ImageController(
     fun createFromUrl(
         @Validated(OnCreate::class) @RequestBody imageUrlRequest: ImageUrlRequest
     ): Mono<ResponseEntity<ImageDto>> {
-        return imageService.saveImageFromUrl(imageUrlRequest)
+        return imageService.saveOrUpdateFromUrl(imageUrlRequest)
             .map { ResponseEntity.ok().body(imageMapper.toDto(it)) }
     }
 
