@@ -9,6 +9,7 @@ import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.ImageService
 import com.tul.shared.shared_images.service.tinify.TinifyService
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -26,6 +27,8 @@ class ImageServiceImpl(
     private val imageMapper: ImageMapper,
     private val webClient: WebClient
 ) : ImageService {
+
+    private val log = LoggerFactory.getLogger(javaClass)
 
     override fun findAll(): Flux<Image> {
         return imageCrudRepository.findAll()
@@ -49,11 +52,14 @@ class ImageServiceImpl(
             )
     }
 
-    override fun saveImageFromUrl(imageUrlRequest: ImageUrlRequest): Mono<Image> {
-        val image = imageMapper.toModel(imageUrlRequest)
-        return getImageFromUrl(imageUrlRequest.url!!)
-            .flatMap { tinifyService.compressImage(it) }
-            .flatMap { storeImage(image, it) }
+    override fun saveOrUpdateFromUrl(imageUrlRequest: ImageUrlRequest): Mono<Image> {
+        return imageCrudRepository.findById(imageUrlRequest.uuid!!)
+                .switchIfEmpty(Mono.just(imageMapper.toModel(imageUrlRequest)))
+                .flatMap {image ->
+                    getImageFromUrl(imageUrlRequest.url!!)
+                            .flatMap { tinifyService.compressImage(it) }
+                            .flatMap { storeImage(image, it) }
+                }
     }
 
     override fun saveDefaultImage(image: Image, byteArray: ByteArray) {
@@ -107,10 +113,15 @@ class ImageServiceImpl(
     }
 
     private fun getImageFromUrl(url: String): Mono<ByteArray> {
-        return webClient.get()
-            .uri(url)
-            .accept(MediaType.ALL)
-            .retrieve()
-            .bodyToMono(ByteArray::class.java)
+        return try {
+            webClient.get()
+                .uri(url)
+                .accept(MediaType.ALL)
+                .retrieve()
+                .bodyToMono(ByteArray::class.java)
+        } catch (e: Exception) {
+            log.warn(e.message)
+            throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY)
+        }
     }
 }

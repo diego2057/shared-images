@@ -11,7 +11,7 @@ interface ImageService {
     fun findAll(): Flux<Image>
     fun findById(id: String): Mono<Image>
     fun save(imageRequest: CreateImageRequest): Mono<Image>
-    fun saveImageFromUrl(imageUrlRequest: ImageUrlRequest): Mono<Image>
+    fun saveOrUpdateFromUrl(imageUrlRequest: ImageUrlRequest): Mono<Image>
     fun saveDefaultImage(image: Image, byteArray: ByteArray)
     fun update(imageRequest: UpdateImageRequest, id: String): Mono<Image>
     fun delete(id: String): Mono<Void>

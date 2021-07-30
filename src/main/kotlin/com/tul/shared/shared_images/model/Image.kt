@@ -26,4 +26,4 @@ data class Image(
     @Field("url")
     @NotNull
     var url: String?,
-)
+) : BaseModel()
