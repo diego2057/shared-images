@@ -54,12 +54,13 @@ class ImageServiceImpl(
 
     override fun saveOrUpdateFromUrl(imageUrlRequest: ImageUrlRequest): Mono<Image> {
         return imageCrudRepository.findById(imageUrlRequest.uuid!!)
-                .switchIfEmpty(Mono.just(imageMapper.toModel(imageUrlRequest)))
-                .flatMap {image ->
-                    getImageFromUrl(imageUrlRequest.url!!)
-                            .flatMap { tinifyService.compressImage(it) }
-                            .flatMap { storeImage(image, it) }
-                }
+            .doOnNext { imageMapper.updateModel(imageUrlRequest, it) }
+            .switchIfEmpty(Mono.just(imageMapper.toModel(imageUrlRequest)))
+            .flatMap { image ->
+                getImageFromUrl(imageUrlRequest.url!!)
+                    .flatMap { tinifyService.compressImage(it) }
+                    .flatMap { storeImage(image, it) }
+            }
     }
 
     override fun saveDefaultImage(image: Image, byteArray: ByteArray) {

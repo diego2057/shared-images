@@ -36,6 +36,14 @@ abstract class ImageMapper {
         return Image(uuid, fileName, mimeType, null, url)
     }
 
+    fun updateModel(imageUrlRequest: ImageUrlRequest, image: Image) {
+        imageUrlRequest.fileName?.let {
+            image.fileName = it
+            image.mimeType = "image/${it.substring(it.lastIndexOf('.') + 1)}"
+        }
+        imageUrlRequest.url?.let { image.url = it }
+    }
+
     abstract fun updateModel(imageRequest: UpdateImageRequest, @MappingTarget image: Image)
 
     abstract fun updateModel(imageRequest: CreateImageRequest, @MappingTarget image: Image)
