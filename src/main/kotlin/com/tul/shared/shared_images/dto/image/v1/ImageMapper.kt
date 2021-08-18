@@ -23,7 +23,7 @@ abstract class ImageMapper {
     abstract fun toModel(imageRequest: CreateImageRequest): Image
 
     @Mappings(
-        Mapping(target = "uuid", expression = "java(java.util.UUID.randomUUID().toString())")
+        Mapping(target = "uuid", defaultExpression = "java(java.util.UUID.randomUUID().toString())")
     )
     abstract fun toModel(imageRequest: UpdateImageRequest): Image
 
