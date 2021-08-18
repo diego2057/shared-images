@@ -1,6 +1,7 @@
 package com.tul.shared.shared_images.service.gallery.impl
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.tul.shared.shared_images.dto.gallery.v1.GalleryImagesRequest
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
@@ -47,6 +48,10 @@ class GalleryServiceImpl(
             .doOnNext { gallery.images = it }
             .thenReturn(gallery)
             .flatMap { galleryRepository.save(it) }
+    }
+
+    override fun save(uuid: String, galleryRequest: GalleryImagesRequest): Mono<Gallery> {
+        return save(RestGalleryRequest(uuid, galleryRequest.images))
     }
 
     override fun addImage(uuid: String, imageRequest: UpdateImageRequest): Mono<Gallery> {
