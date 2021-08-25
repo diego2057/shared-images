@@ -7,6 +7,7 @@ import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreate
 import com.tul.shared.shared_images.dto.request.OnUpdate
+import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.service.image.ImageService
 import io.swagger.annotations.Api
 import org.springframework.http.HttpStatus
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.*
 
 @RestController("image.crud")
 @RequestMapping("v1/images")
@@ -77,7 +79,7 @@ class ImageController(
     }
 
     @PostMapping("/index/multiple")
-    fun indexMultiple(@RequestBody listIds: List<String>): ResponseEntity<Flux<ImageDto>> {
-        return ResponseEntity.ok().body(imageService.findIndexMultiple(listIds).map { imageMapper.toDto(it) })
+    fun indexMultiple(@RequestBody listIds: List<String>): List<Mono<Image>> {
+        return imageService.findIndexMultiple(listIds)
     }
 }

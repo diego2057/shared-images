@@ -6,6 +6,7 @@ import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Image
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.*
 
 interface ImageService {
     fun findAll(): Flux<Image>
@@ -15,5 +16,5 @@ interface ImageService {
     fun saveDefaultImage(image: Image, byteArray: ByteArray)
     fun update(imageRequest: UpdateImageRequest, id: String): Mono<Image>
     fun delete(id: String): Mono<Void>
-    fun findIndexMultiple(ids: List<String>): Flux<Image>
+    fun findIndexMultiple(ids: List<String>): List<Mono<Image>>
 }
