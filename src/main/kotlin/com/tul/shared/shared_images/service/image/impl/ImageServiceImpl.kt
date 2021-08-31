@@ -45,7 +45,12 @@ class ImageServiceImpl(
         image.fileName = file.filename()
         image.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
         return imageCrudRepository.findById(imageRequest.uuid!!)
-            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageRequest.uuid} already exists") }
+            .doOnNext {
+                throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "The image with id ${imageRequest.uuid} already exists"
+                )
+            }
             .switchIfEmpty(
                 tinifyService.compressImage(file)
                     .flatMap { storeImage(image, it) }
@@ -109,8 +114,12 @@ class ImageServiceImpl(
             }
     }
 
-    override fun findIndexMultiple(ids: List<String>): Flux<Image> {
-        return imageCrudRepository.findByUuidIn(ids)
+    override fun findIndexMultiple(ids: List<String>): List<Mono<Image>> {
+        val currentImages = mutableListOf<Mono<Image>>()
+        for (image in ids) {
+            currentImages.add(imageCrudRepository.findById(image))
+        }
+        return currentImages
     }
 
     private fun getImageFromUrl(url: String): Mono<ByteArray> {
