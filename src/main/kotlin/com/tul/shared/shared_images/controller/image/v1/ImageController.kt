@@ -78,7 +78,7 @@ class ImageController(
     }
 
     @PostMapping("/index/multiple")
-    fun indexMultiple(@RequestBody listIds: List<String>): List<Mono<Image>> {
+    fun indexMultiple(@RequestBody listIds: List<String>): Flux<Image> {
         return imageService.findIndexMultiple(listIds)
     }
 }
