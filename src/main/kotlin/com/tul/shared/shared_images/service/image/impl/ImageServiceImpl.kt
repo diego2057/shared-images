@@ -114,12 +114,8 @@ class ImageServiceImpl(
             }
     }
 
-    override fun findIndexMultiple(ids: List<String>): List<Mono<Image>> {
-        val currentImages = mutableListOf<Mono<Image>>()
-        for (image in ids) {
-            currentImages.add(imageCrudRepository.findById(image))
-        }
-        return currentImages
+    override fun findIndexMultiple(ids: List<String>): Flux<Image> {
+        return imageCrudRepository.findByUuidIn(ids)
     }
 
     private fun getImageFromUrl(url: String): Mono<ByteArray> {
