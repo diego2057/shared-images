@@ -72,6 +72,7 @@ pipelines:
                 - ./argocd app sync $ARGO_NAME
           - step:
               name: Test
+              size: 2x
               caches:
                 - gradle
               script:
@@ -133,6 +134,7 @@ pipelines:
                 - ./argocd app sync $ARGO_NAME
           - step:
               name: Test
+              size: 2x
               caches:
                 - gradle
               script:
@@ -149,6 +151,7 @@ pipelines:
               - gradle lintKotlin
         - step:
             name: Test
+            size: 2x
             caches:
               - gradle
             script:

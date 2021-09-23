@@ -45,7 +45,12 @@ class ImageServiceImpl(
         image.fileName = file.filename()
         image.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
         return imageCrudRepository.findById(imageRequest.uuid!!)
-            .doOnNext { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The image with id ${imageRequest.uuid} already exists") }
+            .doOnNext {
+                throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "The image with id ${imageRequest.uuid} already exists"
+                )
+            }
             .switchIfEmpty(
                 tinifyService.compressImage(file)
                     .flatMap { storeImage(image, it) }
@@ -54,12 +59,13 @@ class ImageServiceImpl(
 
     override fun saveOrUpdateFromUrl(imageUrlRequest: ImageUrlRequest): Mono<Image> {
         return imageCrudRepository.findById(imageUrlRequest.uuid!!)
-                .switchIfEmpty(Mono.just(imageMapper.toModel(imageUrlRequest)))
-                .flatMap {image ->
-                    getImageFromUrl(imageUrlRequest.url!!)
-                            .flatMap { tinifyService.compressImage(it) }
-                            .flatMap { storeImage(image, it) }
-                }
+            .doOnNext { imageMapper.updateModel(imageUrlRequest, it) }
+            .switchIfEmpty(Mono.just(imageMapper.toModel(imageUrlRequest)))
+            .flatMap { image ->
+                getImageFromUrl(imageUrlRequest.url!!)
+                    .flatMap { tinifyService.compressImage(it) }
+                    .flatMap { storeImage(image, it) }
+            }
     }
 
     override fun saveDefaultImage(image: Image, byteArray: ByteArray) {

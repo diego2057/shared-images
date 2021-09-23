@@ -21,9 +21,6 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
-
-  jackson:
-    property-naming-strategy: SNAKE_CASE
 server:
   error:
     include-stacktrace: never

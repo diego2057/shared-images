@@ -23,7 +23,7 @@ abstract class ImageMapper {
     abstract fun toModel(imageRequest: CreateImageRequest): Image
 
     @Mappings(
-        Mapping(target = "uuid", expression = "java(java.util.UUID.randomUUID().toString())")
+        Mapping(target = "uuid", defaultExpression = "java(java.util.UUID.randomUUID().toString())")
     )
     abstract fun toModel(imageRequest: UpdateImageRequest): Image
 
@@ -34,6 +34,14 @@ abstract class ImageMapper {
         val mimeType = "image/${fileName.substring(extensionIndex + 1)}"
         val url = imageUrlRequest.url
         return Image(uuid, fileName, mimeType, null, url)
+    }
+
+    fun updateModel(imageUrlRequest: ImageUrlRequest, image: Image) {
+        imageUrlRequest.fileName?.let {
+            image.fileName = it
+            image.mimeType = "image/${it.substring(it.lastIndexOf('.') + 1)}"
+        }
+        imageUrlRequest.url?.let { image.url = it }
     }
 
     abstract fun updateModel(imageRequest: UpdateImageRequest, @MappingTarget image: Image)

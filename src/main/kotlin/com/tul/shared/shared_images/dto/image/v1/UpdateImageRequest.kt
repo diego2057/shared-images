@@ -5,6 +5,7 @@ import org.springframework.http.codec.multipart.FilePart
 import javax.validation.constraints.NotNull
 
 class UpdateImageRequest {
+    var uuid: String? = null
     @NotNull(groups = [OnCreateGallery::class])
     var image: FilePart? = null
 }

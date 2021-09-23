@@ -1,5 +1,6 @@
 package com.tul.shared.shared_images.service.gallery
 
+import com.tul.shared.shared_images.dto.gallery.v1.GalleryImagesRequest
 import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Gallery
@@ -15,4 +16,5 @@ interface GalleryService {
     fun update(uuid: String, images: List<CreateImageRequest>): Mono<Gallery>
     fun deleteImages(uuid: String, imagesUuid: List<String>): Mono<Gallery>
     fun deleteImage(uuid: String, imageUuid: String): Mono<Gallery>
+    fun save(uuid: String, galleryRequest: GalleryImagesRequest): Mono<Gallery>
 }
