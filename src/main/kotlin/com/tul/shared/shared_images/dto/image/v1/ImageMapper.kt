@@ -7,6 +7,7 @@ import org.mapstruct.MappingTarget
 import org.mapstruct.Mappings
 import org.mapstruct.NullValuePropertyMappingStrategy
 import org.mapstruct.ReportingPolicy
+import java.util.*
 
 @Mapper(
     componentModel = "spring",
@@ -28,12 +29,11 @@ abstract class ImageMapper {
     abstract fun toModel(imageRequest: UpdateImageRequest): Image
 
     fun toModel(imageUrlRequest: ImageUrlRequest): Image {
-        val fileName = imageUrlRequest.fileName!!
         val uuid = imageUrlRequest.uuid!!
-        val extensionIndex = fileName.lastIndexOf('.')
-        val mimeType = "image/${fileName.substring(extensionIndex + 1)}"
+        val extensionIndex = imageUrlRequest.fileName?.lastIndexOf('.')
+        val mimeType = "image/${ imageUrlRequest.fileName?.substring(extensionIndex?.plus(1) ?: 0)}"
         val url = imageUrlRequest.url
-        return Image(uuid, fileName, mimeType, null, url)
+        return Image(uuid, imageUrlRequest.fileName, mimeType, null, url)
     }
 
     fun updateModel(imageUrlRequest: ImageUrlRequest, image: Image) {
