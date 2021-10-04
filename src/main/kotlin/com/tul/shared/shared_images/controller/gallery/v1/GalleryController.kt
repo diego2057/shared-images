@@ -4,6 +4,7 @@ import com.tul.shared.shared_images.dto.gallery.v1.GalleryDto
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest
 import com.tul.shared.shared_images.dto.gallery.v1.UpdateGalleryRequest
+import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreateGallery
 import com.tul.shared.shared_images.service.gallery.GalleryService
@@ -57,6 +58,16 @@ class GalleryController(
         @Validated(OnCreateGallery::class)
         @ModelAttribute imageRequest: UpdateImageRequest,
         @PathVariable id: String
+    ): Mono<ResponseEntity<GalleryDto>> {
+        return galleryService.addImage(id, imageRequest)
+            .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
+    }
+
+    @PostMapping("/{id}/images/url")
+    fun createUrl(
+        @PathVariable id: String,
+        @Validated(OnCreateGallery::class)
+        @ModelAttribute imageRequest: ImageUrlRequest
     ): Mono<ResponseEntity<GalleryDto>> {
         return galleryService.addImage(id, imageRequest)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
