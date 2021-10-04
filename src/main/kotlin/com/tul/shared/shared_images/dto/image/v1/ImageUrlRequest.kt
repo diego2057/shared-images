@@ -10,4 +10,5 @@ class ImageUrlRequest {
     var fileName: String? = null
     @NotNull(groups = [OnCreate::class])
     var url: String? = null
+    var mimeType: String? = null
 }

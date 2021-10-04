@@ -5,6 +5,7 @@ import com.tul.shared.shared_images.dto.gallery.v1.GalleryImagesRequest
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
+import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Gallery
 import com.tul.shared.shared_images.model.Image
@@ -62,6 +63,13 @@ class GalleryServiceImpl(
                 it.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
                 tinifyService.compressImage(file).flatMap { json -> storeImage(it, json, uuid) }
             }
+            .zipWith(galleryRepository.findById(uuid).defaultIfEmpty(Gallery(uuid, mutableListOf())))
+            .doOnNext { it.t2.images.add(it.t1) }
+            .flatMap { galleryRepository.save(it.t2) }
+    }
+
+    override fun addImage(uuid: String, imageRequest: ImageUrlRequest): Mono<Gallery> {
+        return Mono.just(imageRequest).map(imageMapper::toModel)
             .zipWith(galleryRepository.findById(uuid).defaultIfEmpty(Gallery(uuid, mutableListOf())))
             .doOnNext { it.t2.images.add(it.t1) }
             .flatMap { galleryRepository.save(it.t2) }
