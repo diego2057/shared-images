@@ -7,7 +7,6 @@ import org.mapstruct.MappingTarget
 import org.mapstruct.Mappings
 import org.mapstruct.NullValuePropertyMappingStrategy
 import org.mapstruct.ReportingPolicy
-import java.util.*
 
 @Mapper(
     componentModel = "spring",
