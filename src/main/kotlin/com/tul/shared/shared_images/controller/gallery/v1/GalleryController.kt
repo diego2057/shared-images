@@ -63,6 +63,16 @@ class GalleryController(
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
+    @PutMapping("/{id}/images")
+    fun addImagePut(
+        @Validated(OnCreateGallery::class)
+        @ModelAttribute imageRequest: UpdateImageRequest,
+        @PathVariable id: String
+    ): Mono<ResponseEntity<GalleryDto>> {
+        return galleryService.addImage(id, imageRequest)
+            .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
+    }
+
     @PostMapping("/{id}/images/url")
     fun createUrl(
         @PathVariable id: String,
