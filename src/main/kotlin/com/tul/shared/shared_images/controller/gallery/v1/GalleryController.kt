@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -55,6 +56,16 @@ class GalleryController(
 
     @PatchMapping("/{id}/images")
     fun addImage(
+        @Validated(OnCreateGallery::class)
+        @ModelAttribute imageRequest: UpdateImageRequest,
+        @PathVariable id: String
+    ): Mono<ResponseEntity<GalleryDto>> {
+        return galleryService.addImage(id, imageRequest)
+            .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
+    }
+
+    @PutMapping("/{id}/images")
+    fun addImagePut(
         @Validated(OnCreateGallery::class)
         @ModelAttribute imageRequest: UpdateImageRequest,
         @PathVariable id: String
