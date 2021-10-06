@@ -63,7 +63,7 @@ class GalleryController(
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
     }
 
-    @PostMapping("/{id}/images")
+    @PostMapping("/{id}/create-images")
     fun addImagePost(
         @Validated(OnCreateGallery::class)
         @ModelAttribute imageRequest: UpdateImageRequest,
