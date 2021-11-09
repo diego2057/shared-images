@@ -7,6 +7,7 @@ import com.tul.shared.shared_images.dto.gallery.v1.UpdateGalleryRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.dto.request.OnCreateGallery
+import com.tul.shared.shared_images.model.Gallery
 import com.tul.shared.shared_images.service.gallery.GalleryService
 import io.swagger.annotations.Api
 import org.springframework.http.HttpStatus
@@ -108,5 +109,12 @@ class GalleryController(
     ): Mono<ResponseEntity<GalleryDto>> {
         return galleryService.deleteImages(id, imagesUuid)
             .map { ResponseEntity.ok().body(galleryMapper.toDto(it)) }
+    }
+
+    @PostMapping("/multiple")
+    fun multiple(
+        @RequestBody listIds: List<String>
+    ): Flux<Gallery> {
+        return galleryService.multiple(listIds)
     }
 }

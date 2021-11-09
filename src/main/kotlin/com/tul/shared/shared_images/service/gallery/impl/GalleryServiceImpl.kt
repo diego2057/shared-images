@@ -114,6 +114,10 @@ class GalleryServiceImpl(
         return deleteImages(uuid, listOf(imageUuid))
     }
 
+    override fun multiple(ids: List<String>): Flux<Gallery> {
+        return galleryRepository.findByUuidIn(ids)
+    }
+
     private fun storeImage(image: Image, jsonNode: JsonNode, galleryUUID: String): Mono<Image> {
         image.size = jsonNode.get("input").get("size").asLong()
         return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), extensionName(image, galleryUUID))
