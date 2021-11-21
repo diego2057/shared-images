@@ -5,6 +5,7 @@ import com.tul.shared.shared_images.dto.gallery.v1.GalleryImagesRequest
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.dto.image.v1.CreateImageRequest
 import com.tul.shared.shared_images.dto.image.v1.ImageMapper
+import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import com.tul.shared.shared_images.dto.image.v1.UpdateImageRequest
 import com.tul.shared.shared_images.model.Gallery
 import com.tul.shared.shared_images.model.Image
@@ -67,6 +68,13 @@ class GalleryServiceImpl(
             .flatMap { galleryRepository.save(it.t2) }
     }
 
+    override fun addImage(uuid: String, imageRequest: ImageUrlRequest): Mono<Gallery> {
+        return Mono.just(imageRequest).map(imageMapper::toModel)
+            .zipWith(galleryRepository.findById(uuid).defaultIfEmpty(Gallery(uuid, mutableListOf())))
+            .doOnNext { it.t2.images.add(it.t1) }
+            .flatMap { galleryRepository.save(it.t2) }
+    }
+
     override fun update(uuid: String, images: List<CreateImageRequest>): Mono<Gallery> {
         val galleryMono = galleryRepository.findById(uuid).defaultIfEmpty(Gallery(uuid, mutableListOf()))
         val imageFlux = Flux.fromStream(images.stream())
@@ -104,6 +112,10 @@ class GalleryServiceImpl(
 
     override fun deleteImage(uuid: String, imageUuid: String): Mono<Gallery> {
         return deleteImages(uuid, listOf(imageUuid))
+    }
+
+    override fun multiple(ids: List<String>): Flux<Gallery> {
+        return galleryRepository.findByUuidIn(ids)
     }
 
     private fun storeImage(image: Image, jsonNode: JsonNode, galleryUUID: String): Mono<Image> {

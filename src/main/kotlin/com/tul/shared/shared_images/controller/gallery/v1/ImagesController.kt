@@ -36,6 +36,7 @@ class ImagesController(
     private val galleryRepository: CrudRepository,
     private val imageMapper: ImageMapper
 ) {
+
     @PostMapping("/{id}/images")
     fun create(
         @PathVariable id: String,
