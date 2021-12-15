@@ -3,144 +3,139 @@ image: gradle:6.6.1-jdk11
 clone:
   depth: full
 
+definitions:
+  caches:
+    sonar: ~/.sonar/cache
+  steps:
+    - step: &Test
+        name: Test
+        size: 2x
+        caches:
+          - gradle
+          - sonar
+        script:
+          - gradle build jacocoTestReport sonarqube -x lintKotlin
+        artifacts:
+          - build/**
+
 pipelines:
   branches:
     develop:
-      - step:
-          name: Push imagen
-          services:
-            - docker
-          caches:
-            - gradle
-          script:
-            - gradle build -x lintKotlin -x test
-            - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
-            - TAG="${BITBUCKET_COMMIT}"
-            - docker build -t $REPO_SLUG .
-            - pipe: atlassian/aws-ecr-push-image:1.3.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ECR_KEY
-                AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET
-                AWS_DEFAULT_REGION: $AWS_ECR_DEV_REGION
-                IMAGE_NAME: $REPO_SLUG
-                TAGS: $TAG
       - parallel:
           - step:
-              name: Deploy on api.co.dev.soytul.com
+              name: Deploy develop
+              deployment: test
               services:
                 - docker
               caches:
                 - gradle
               script:
+                - gradle build -x lintKotlin -x test
                 - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
                 - TAG="${BITBUCKET_COMMIT}"
-                - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v1.7.11/argocd-linux-amd64
-                - chmod +x argocd
-                - ARGO_NAME="dev-${REPO_SLUG}"
-                - ./argocd login ${ARGOS_DEV_URL} --username ${ARGOS_DEV_USER} --password ${ARGOS_DEV_PASSWORD} --insecure
-                - ./argocd app set $ARGO_NAME -p image.tag=$TAG
-                - ./argocd app sync $ARGO_NAME
-          - step:
-              name: Deploy on api.ec.dev.soytul.com
-              services:
-                - docker
-              caches:
-                - gradle
-              script:
-                - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
-                - TAG="${BITBUCKET_COMMIT}"
-                - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v1.7.11/argocd-linux-amd64
-                - chmod +x argocd
-                - ARGO_NAME="dev-ec-${REPO_SLUG}"
-                - ./argocd login ${ARGOS_DEV_URL} --username ${ARGOS_DEV_USER} --password ${ARGOS_DEV_PASSWORD} --insecure
-                - ./argocd app set $ARGO_NAME -p image.tag=$TAG
-                - ./argocd app sync $ARGO_NAME
-          - step:
-              name: Deploy on api.mx.dev.soytul.com
-              services:
-                - docker
-              caches:
-                - gradle
-              script:
-                - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
-                - TAG="${BITBUCKET_COMMIT}"
-                - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v1.7.11/argocd-linux-amd64
-                - chmod +x argocd
-                - ARGO_NAME="dev-mx-${REPO_SLUG}"
-                - ./argocd login ${ARGOS_DEV_URL} --username ${ARGOS_DEV_USER} --password ${ARGOS_DEV_PASSWORD} --insecure
-                - ./argocd app set $ARGO_NAME -p image.tag=$TAG
-                - ./argocd app sync $ARGO_NAME
-          - step:
-              name: Test
-              size: 2x
-              caches:
-                - gradle
-              script:
-                - gradle build jacocoTestReport sonarqube -x lintKotlin
-              artifacts:
-                - build/**
+                - docker build -t $REPO_SLUG .
+                - pipe: atlassian/aws-ecr-push-image:1.3.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ECR_KEY
+                    AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET
+                    AWS_DEFAULT_REGION: $AWS_ECR_DEV_REGION
+                    IMAGE_NAME: $REPO_SLUG
+                    TAGS: $TAG
+                - echo "Deploy on api.co.dev.soytul.com"
+                - NAME="dev-${REPO_SLUG}"
+                - pipe: docker://soytul/argos
+                  variables:
+                    ARGOS_URL: $ARGOS_DEV_URL
+                    ARGOS_USER: $ARGOS_DEV_USER
+                    ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
+                    ARGOS_NAME: $NAME
+                    ARGOS_TAG: $TAG
+                - echo "Deploy on api.ec.dev.soytul.com"
+                - NAME="dev-ec-${REPO_SLUG}"
+                - pipe: docker://soytul/argos
+                  variables:
+                    ARGOS_URL: $ARGOS_DEV_URL
+                    ARGOS_USER: $ARGOS_DEV_USER
+                    ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
+                    ARGOS_NAME: $NAME
+                    ARGOS_TAG: $TAG
+                - echo "Deploy on api.mx.dev.soytul.com"
+                - NAME="dev-mx-${REPO_SLUG}"
+                - pipe: docker://soytul/argos
+                  variables:
+                    ARGOS_URL: $ARGOS_DEV_URL
+                    ARGOS_USER: $ARGOS_DEV_USER
+                    ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
+                    ARGOS_NAME: $NAME
+                    ARGOS_TAG: $TAG
+                - echo "Deploy on api.br.dev.soytul.com"
+                - NAME="dev-br-${REPO_SLUG}"
+                - pipe: docker://soytul/argos
+                  variables:
+                    ARGOS_URL: $ARGOS_DEV_URL
+                    ARGOS_USER: $ARGOS_DEV_USER
+                    ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
+                    ARGOS_NAME: $NAME
+                    ARGOS_TAG: $TAG
+          - step: *Test
     master:
-      - step:
-          name: Push imagen
-          services:
-            - docker
-          caches:
-            - gradle
-          script:
-            - gradle build -x lintKotlin -x test
-            - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
-            - TAG="${BITBUCKET_COMMIT}"
-            - docker build -t $REPO_SLUG .
-            - pipe: atlassian/aws-ecr-push-image:1.3.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ECR_KEY_PROD
-                AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET_PROD
-                AWS_DEFAULT_REGION: $AWS_ECR_REGION_PROD
-                IMAGE_NAME: $REPO_SLUG
-                TAGS: $TAG
       - parallel:
           - step:
-              name: Deploy on api.tul.com.co
-              script:
-                - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
-                - TAG="${BITBUCKET_COMMIT}"
-                - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v1.7.11/argocd-linux-amd64
-                - chmod +x argocd
-                - ARGO_NAME="co-${REPO_SLUG}"
-                - ./argocd login ${ARGOS_PROD_URL} --username ${ARGOS_PROD_USER} --password ${ARGOS_PROD_PASSWORD} --insecure
-                - ./argocd app set $ARGO_NAME -p image.tag=$TAG
-                - ./argocd app sync $ARGO_NAME
-          - step:
-              name: Deploy on api.tul.com.ec
-              script:
-                - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
-                - TAG="${BITBUCKET_COMMIT}"
-                - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v1.7.11/argocd-linux-amd64
-                - chmod +x argocd
-                - ARGO_NAME="ec-${REPO_SLUG}"
-                - ./argocd login ${ARGOS_PROD_URL} --username ${ARGOS_PROD_USER} --password ${ARGOS_PROD_PASSWORD} --insecure
-                - ./argocd app set $ARGO_NAME -p image.tag=$TAG
-                - ./argocd app sync $ARGO_NAME
-          - step:
-              name: Deploy on api.tul.com.mx
-              script:
-                - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
-                - TAG="${BITBUCKET_COMMIT}"
-                - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v1.7.11/argocd-linux-amd64
-                - chmod +x argocd
-                - ARGO_NAME="mx-${REPO_SLUG}"
-                - ./argocd login ${ARGOS_PROD_URL} --username ${ARGOS_PROD_USER} --password ${ARGOS_PROD_PASSWORD} --insecure
-                - ./argocd app set $ARGO_NAME -p image.tag=$TAG
-                - ./argocd app sync $ARGO_NAME
-          - step:
-              name: Test
-              size: 2x
+              name: Deploy master
+              deployment: production
+              services:
+                - docker
               caches:
                 - gradle
               script:
-                - gradle build jacocoTestReport sonarqube -x lintKotlin
-              artifacts:
-                - build/**
+                - gradle build -x lintKotlin -x test
+                - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
+                - TAG="${BITBUCKET_COMMIT}"
+                - docker build -t $REPO_SLUG .
+                - pipe: atlassian/aws-ecr-push-image:1.3.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ECR_KEY_PROD
+                    AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET_PROD
+                    AWS_DEFAULT_REGION: $AWS_ECR_REGION_PROD
+                    IMAGE_NAME: $REPO_SLUG
+                    TAGS: $TAG
+                - echo "Deploy on api.co.soytul.com"
+                - NAME="co-${REPO_SLUG}"
+                - pipe: docker://soytul/argos
+                  variables:
+                    ARGOS_URL: $ARGOS_PROD_URL
+                    ARGOS_USER: $ARGOS_PROD_USER
+                    ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
+                    ARGOS_NAME: $NAME
+                    ARGOS_TAG: $TAG
+                - echo "Deploy on api.ec.soytul.com"
+                - NAME="ec-${REPO_SLUG}"
+                - pipe: docker://soytul/argos
+                  variables:
+                    ARGOS_URL: $ARGOS_PROD_URL
+                    ARGOS_USER: $ARGOS_PROD_USER
+                    ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
+                    ARGOS_NAME: $NAME
+                    ARGOS_TAG: $TAG
+                - echo "Deploy on api.mx.soytul.com"
+                - NAME="mx-${REPO_SLUG}"
+                - pipe: docker://soytul/argos
+                  variables:
+                    ARGOS_URL: $ARGOS_PROD_URL
+                    ARGOS_USER: $ARGOS_PROD_USER
+                    ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
+                    ARGOS_NAME: $NAME
+                    ARGOS_TAG: $TAG
+                - echo "Deploy on api.br.soytul.com"
+                - NAME="br-${REPO_SLUG}"
+                - pipe: docker://soytul/argos
+                  variables:
+                    ARGOS_URL: $ARGOS_PROD_URL
+                    ARGOS_USER: $ARGOS_PROD_USER
+                    ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
+                    ARGOS_NAME: $NAME
+                    ARGOS_TAG: $TAG
+          - step: *Test
   default:
     - parallel:
         - step:
@@ -149,16 +144,9 @@ pipelines:
               - gradle
             script:
               - gradle lintKotlin
-        - step:
-            name: Test
-            size: 2x
-            caches:
-              - gradle
-            script:
-              - gradle build jacocoTestReport sonarqube -x lintKotlin
-            artifacts:
-              - build/**
+              - gradle compileKotlin
+        - step: *Test
         - step:
             name: Security scan
             script:
-              - pipe: atlassian/git-secrets-scan:0.4.3
+              - pipe: atlassian/git-secrets-scan:0.5.1
