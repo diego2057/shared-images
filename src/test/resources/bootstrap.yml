@@ -1,10 +1,6 @@
 spring:
-  application:
-    name: shared_images
-  profiles:
-    active: ${ENVIRONMENT:dev}
   cloud:
     config:
       uri: http://shared-config-server.shared-config-server.svc/
       enabled: true
-      fail-fast: true
+      fail-fast: false
