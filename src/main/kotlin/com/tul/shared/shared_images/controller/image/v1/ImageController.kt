@@ -32,7 +32,7 @@ import reactor.core.publisher.Mono
 
 @RestController("image.crud")
 @RequestMapping("v1/images")
-@Api(tags = ["Image", "crud"])
+@Api(tags = ["image"])
 class ImageController(
     private val imageService: ImageService,
     private val imageMapper: ImageMapper,
