@@ -17,7 +17,7 @@ import java.util.UUID
 
 @RestController("_client.gallery.crud")
 @RequestMapping("_client/v1/galleries")
-@Api(tags = ["Client gallery ", "gallery"])
+@Api(tags = ["client.gallery"])
 class ClientGalleryController(
     private val galleryService: GalleryService,
     private val galleryMapper: GalleryMapper

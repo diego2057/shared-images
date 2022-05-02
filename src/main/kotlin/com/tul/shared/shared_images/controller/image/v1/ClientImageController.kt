@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono
 
 @RestController("_client.image.crud")
 @RequestMapping("_client/v1/images")
-@Api(tags = ["Client image ", "image"])
+@Api(tags = ["client.image"])
 class ClientImageController(
     private val imageService: ImageService,
     private val imageMapper: ImageMapper
