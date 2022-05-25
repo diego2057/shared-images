@@ -35,8 +35,6 @@ dependencies {
 	implementation("io.projectreactor.kafka:reactor-kafka:1.3.1")
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation ("io.springfox:springfox-boot-starter:3.0.0")
-	implementation("io.sentry:sentry-spring-boot-starter:4.3.0")
-	implementation("io.sentry:sentry-logback:4.3.0")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	api("org.mapstruct:mapstruct:1.4.1.Final")
 	kapt("org.mapstruct:mapstruct-processor:1.4.1.Final")
