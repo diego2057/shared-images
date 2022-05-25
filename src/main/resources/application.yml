@@ -8,9 +8,6 @@ app:
     secret-key: ${AWS_SECRET_KEY:${random.value}}
     region: ${AWS_REGION:${random.value}}
     bucket: ${OWN_BUCKET_NAME:app}
-sentry:
-  enable-tracing: true
-  traces-sample-rate: 0.3
 spring:
   data:
     mongodb:
@@ -24,6 +21,7 @@ spring:
 server:
   error:
     include-stacktrace: never
+    include-message: always
 logging:
   level:
     tul:

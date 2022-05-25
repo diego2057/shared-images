@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("_guest/v1/images")
-@Api(tags = ["Guest image ", "image"])
+@Api(tags = ["guest.image"])
 class GuestImageController(
     private val imageService: ImageService,
     private val imageMapper: ImageMapper

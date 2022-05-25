@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono
 
 @RestController("gallery_images.crud")
 @RequestMapping("v1/galleries")
-@Api(tags = ["gallery", "crud"])
+@Api(tags = ["gallery"])
 class ImagesController(
     private val galleryService: GalleryService,
     private val imageService: ImageService,
