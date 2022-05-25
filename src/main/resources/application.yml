@@ -22,6 +22,20 @@ server:
   error:
     include-stacktrace: never
     include-message: always
+logging:
+  level:
+    tul:
+      com:
+        examples:
+          spring: TRACE
+    org:
+      springframework:
+        cache: TRACE
+    reactor:
+      netty:
+        http:
+          client:
+            HttpClient: TRACE
 management:
   endpoints:
     web:
