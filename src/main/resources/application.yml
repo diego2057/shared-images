@@ -28,4 +28,4 @@ management:
       exposure:
         include: "*"
     loggers:
-      enabled: true
+      enabled: false
