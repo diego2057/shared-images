@@ -50,15 +50,6 @@ pipelines:
                     ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
                     ARGOS_NAME: $NAME
                     ARGOS_TAG: $TAG
-                - echo "Deploy on api.ec.dev.soytul.com"
-                - NAME="dev-ec-${REPO_SLUG}"
-                - pipe: docker://soytul/argos
-                  variables:
-                    ARGOS_URL: $ARGOS_DEV_URL
-                    ARGOS_USER: $ARGOS_DEV_USER
-                    ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
-                    ARGOS_NAME: $NAME
-                    ARGOS_TAG: $TAG
                 - echo "Deploy on api.mx.dev.soytul.com"
                 - NAME="dev-mx-${REPO_SLUG}"
                 - pipe: docker://soytul/argos
@@ -78,6 +69,35 @@ pipelines:
                     ARGOS_NAME: $NAME
                     ARGOS_TAG: $TAG
           - step: *Test
+    release/*:
+      - step:
+          name: Deploy qa
+          deployment: staging
+          services:
+            - docker
+          caches:
+            - gradle
+          script:
+            - gradle build -x lintKotlin -x test
+            - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
+            - TAG="${BITBUCKET_COMMIT}"
+            - docker build -t $REPO_SLUG .
+            - pipe: atlassian/aws-ecr-push-image:1.3.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ECR_KEY
+                AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET
+                AWS_DEFAULT_REGION: $AWS_ECR_DEV_REGION
+                IMAGE_NAME: $REPO_SLUG
+                TAGS: $TAG
+            - echo "Deploy on api.qa.dev.soytul.com"
+            - NAME="qa-${REPO_SLUG}"
+            - pipe: docker://soytul/argos
+              variables:
+                ARGOS_URL: $ARGOS_DEV_URL
+                ARGOS_USER: $ARGOS_DEV_USER
+                ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
+                ARGOS_NAME: $NAME
+                ARGOS_TAG: $TAG
     master:
       - parallel:
           - step:
@@ -101,15 +121,6 @@ pipelines:
                     TAGS: $TAG
                 - echo "Deploy on api.co.soytul.com"
                 - NAME="co-${REPO_SLUG}"
-                - pipe: docker://soytul/argos
-                  variables:
-                    ARGOS_URL: $ARGOS_PROD_URL
-                    ARGOS_USER: $ARGOS_PROD_USER
-                    ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
-                    ARGOS_NAME: $NAME
-                    ARGOS_TAG: $TAG
-                - echo "Deploy on api.ec.soytul.com"
-                - NAME="ec-${REPO_SLUG}"
                 - pipe: docker://soytul/argos
                   variables:
                     ARGOS_URL: $ARGOS_PROD_URL
