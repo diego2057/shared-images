@@ -154,7 +154,7 @@ class ImageControllerTest {
     @Test
     fun updateImageDataTest() {
         val uuid = UUID.randomUUID().toString()
-        var bodyBuilder = MultipartBodyBuilder()
+        val bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
 
         client.patch()

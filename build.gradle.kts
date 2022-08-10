@@ -43,6 +43,9 @@ dependencies {
 	testImplementation("de.bwaldvogel:mongo-java-server:1.36.0")
 	testImplementation("com.github.tomakehurst:wiremock-jre8:2.25.1")
 	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("com.github.javafaker:javafaker:0.14") {
+		exclude(module = "org.yaml")
+	}
 }
 
 extra["springCloudVersion"] = "2020.0.1"

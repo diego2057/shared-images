@@ -1,1 +1,1 @@
-rootProject.name = "images"
+rootProject.name = "shared-images"
