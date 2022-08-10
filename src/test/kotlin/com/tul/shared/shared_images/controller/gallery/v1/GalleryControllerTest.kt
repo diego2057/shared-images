@@ -1,5 +1,7 @@
 package com.tul.shared.shared_images.controller.gallery.v1
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.javafaker.Faker
 import com.tul.shared.shared_images.configuration.TestConfiguration
 import com.tul.shared.shared_images.configuration.TinifyMock
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryDto
@@ -31,7 +33,12 @@ class GalleryControllerTest {
     @Autowired
     private lateinit var client: WebTestClient
 
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
     private var tinifyMock = TinifyMock(8090)
+
+    private val faker = Faker()
 
     @BeforeAll
     fun loadMock() {
@@ -158,6 +165,42 @@ class GalleryControllerTest {
     }
 
     @Test
+    fun addImagePostTest() {
+        val uuid = UUID.randomUUID().toString()
+        val file = ClassPathResource("test.png")
+        var bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", uuid)
+
+        client.post()
+            .uri("/v1/galleries")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("uuid").isEqualTo(uuid)
+            .jsonPath("images[0].uuid").isNotEmpty
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
+
+        bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("image", file, MediaType.MULTIPART_FORM_DATA)
+
+        client.post()
+            .uri("/v1/galleries/$uuid/create-images")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("uuid").isEqualTo(uuid)
+            .jsonPath("images[0].uuid").isNotEmpty
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
+            .jsonPath("images[1].uuid").isNotEmpty
+            .jsonPath("images[1].file_name").isEqualTo(file.filename!!)
+    }
+
+    @Test
     fun addImageNotExistGalleryTest() {
         val uuid = UUID.randomUUID().toString()
         val file = ClassPathResource("test.png")
@@ -175,6 +218,29 @@ class GalleryControllerTest {
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
             .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
+    }
+
+    @Test
+    fun createUrl() {
+        val uuid = UUID.randomUUID().toString()
+
+        val file = ClassPathResource("test.png")
+        val bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("fileName", file.filename!!)
+        bodyBuilder.part("uuid", uuid)
+        bodyBuilder.part("url", faker.internet().url())
+        bodyBuilder.part("mimeType", "image/png")
+
+        client.post()
+            .uri("/v1/galleries/$uuid/images/url")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("uuid").isEqualTo(uuid)
+            .jsonPath("images[0].uuid").isNotEmpty
+            .jsonPath("images[0].file_name").isEqualTo("test.png")
     }
 
     @Test
@@ -284,5 +350,46 @@ class GalleryControllerTest {
             .expectBody(GalleryDto::class.java).returnResult().responseBody
 
         Assertions.assertEquals(galleryDto?.images?.size, 0)
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    fun multiple() {
+        val uuid1 = UUID.randomUUID().toString()
+        val bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("images[0].image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", uuid1)
+
+        val uuid2 = UUID.randomUUID().toString()
+        val bodyBuilder2 = MultipartBodyBuilder()
+        bodyBuilder2.part("images[0].image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder2.part("uuid", uuid2)
+
+        client.post()
+            .uri("/v1/galleries")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(GalleryDto::class.java).returnResult().responseBody
+
+        client.post()
+            .uri("/v1/galleries")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder2.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(GalleryDto::class.java).returnResult().responseBody
+
+        val galleryDtoArray = client.post()
+            .uri("/v1/galleries/multiple")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(objectMapper.writeValueAsString(listOf(uuid1, uuid2))))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(Array<GalleryDto>::class.java)
+            .returnResult().responseBody!!
+
+        Assertions.assertEquals(2, galleryDtoArray.size)
     }
 }
