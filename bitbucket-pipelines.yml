@@ -135,13 +135,13 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_ECR_REGION_PROD
                     IMAGE_NAME: $REPO_SLUG
                     TAGS: $TAG
-                - pipe: atlassian/aws-ecr-push-image:1.3.0
-                  variables:
-                    AWS_ACCESS_KEY_ID: $AWS_ECR_KEY_PROD
-                    AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET_PROD
-                    AWS_DEFAULT_REGION: $AWS_ECR_REGION_GLOBAL
-                    IMAGE_NAME: $REPO_SLUG
-                    TAGS: $TAG    
+                #- pipe: atlassian/aws-ecr-push-image:1.3.0
+                #  variables:
+                #    AWS_ACCESS_KEY_ID: $AWS_ECR_KEY_PROD
+                #    AWS_SECRET_ACCESS_KEY: $AWS_ECR_SECRET_PROD
+                #    AWS_DEFAULT_REGION: $AWS_ECR_REGION_GLOBAL
+                #    IMAGE_NAME: $REPO_SLUG
+                #    TAGS: $TAG
                 - echo "Deploy on api.co.soytul.com"
                 - NAME="co-${REPO_SLUG}"
                 - pipe: docker://soytul/argos
@@ -169,15 +169,15 @@ pipelines:
                     ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
                     ARGOS_NAME: $NAME
                     ARGOS_TAG: $TAG
-                - echo "Deploy on api.dev.soytul.com"
-                - NAME="global-${REPO_SLUG}"
-                - pipe: docker://soytul/argos
-                  variables:
-                    ARGOS_URL: $ARGOS_PROD_URL
-                    ARGOS_USER: $ARGOS_PROD_USER
-                    ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
-                    ARGOS_NAME: $NAME
-                    ARGOS_TAG: $TAG
+                #- echo "Deploy on api.dev.soytul.com"
+                #- NAME="global-${REPO_SLUG}"
+                #- pipe: docker://soytul/argos
+                #  variables:
+                #    ARGOS_URL: $ARGOS_PROD_URL
+                #    ARGOS_USER: $ARGOS_PROD_USER
+                #    ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
+                #    ARGOS_NAME: $NAME
+                #    ARGOS_TAG: $TAG
           - step: *Test
   default:
     - parallel:
