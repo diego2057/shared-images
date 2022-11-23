@@ -6,7 +6,18 @@ clone:
 definitions:
   caches:
     sonar: ~/.sonar/cache
+  services:
+    docker:
+      memory: 2048
   steps:
+    - step: &Lint
+        name: Lint and Compile
+        caches:
+          - gradle
+        script:
+          - gradle clean ktlintCheck compileKotlin -PnexusHost=https://nexus.dev.soytul.com --info
+        artifacts:
+          - build/**
     - step: &Test
         name: Test
         size: 2x
@@ -22,8 +33,11 @@ pipelines:
   branches:
     develop:
       - parallel:
+          - step: *Lint
+          - step: *Test
           - step:
               name: Deploy develop
+              size: 2x
               deployment: test
               services:
                 - docker
@@ -84,38 +98,13 @@ pipelines:
                     ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
                     ARGOS_NAME: $NAME
                     ARGOS_TAG: $TAG
-          - step: *Test
     release/*:
-      - step:
-          name: Deploy qa
-          deployment: staging
-          services:
-            - docker
-          caches:
-            - gradle
-          script:
-            - gradle build -x lintKotlin -x test
-            - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
-            - TAG="${BITBUCKET_COMMIT}"
-            - docker build -t $REPO_SLUG .
-            - pipe: atlassian/aws-ecr-push-image:1.3.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ECR_QA_DEV_KEY
-                AWS_SECRET_ACCESS_KEY: $AWS_ECR_QA_DEV_SECRET
-                AWS_DEFAULT_REGION: $AWS_ECR_DEV_REGION
-                IMAGE_NAME: $REPO_SLUG
-                TAGS: $TAG
-            - echo "Deploy on api.qa.dev.soytul.com"
-            - NAME="qa-${REPO_SLUG}"
-            - pipe: docker://soytul/argos
-              variables:
-                ARGOS_URL: $ARGOS_DEV_URL
-                ARGOS_USER: $ARGOS_DEV_USER
-                ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
-                ARGOS_NAME: $NAME
-                ARGOS_TAG: $TAG
+      - step: *Lint
+      - step: *Test
     master:
       - parallel:
+          - step: *Lint
+          - step: *Test
           - step:
               name: Deploy master
               deployment: production
@@ -178,7 +167,6 @@ pipelines:
                 #    ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
                 #    ARGOS_NAME: $NAME
                 #    ARGOS_TAG: $TAG
-          - step: *Test
   default:
     - parallel:
         - step:
