@@ -20,4 +20,6 @@ interface GalleryService {
     fun deleteImage(uuid: String, imageUuid: String): Mono<Gallery>
     fun save(uuid: String, galleryRequest: GalleryImagesRequest): Mono<Gallery>
     fun multiple(ids: List<String>): Flux<Gallery>
+    fun saveFromUrl(uuid: String, images: List<ImageUrlRequest>): Mono<Gallery>
+    fun updateFromUrl(uuid: String, images: List<ImageUrlRequest>): Mono<Gallery>
 }

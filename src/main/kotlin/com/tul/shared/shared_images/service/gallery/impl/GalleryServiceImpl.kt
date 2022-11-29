@@ -11,10 +11,16 @@ import com.tul.shared.shared_images.model.Gallery
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.gallery.CrudRepository
 import com.tul.shared.shared_images.service.tinify.TinifyService
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryRequest as RestGalleryRequest
 import com.tul.shared.shared_images.service.gallery.GalleryService as GalleryService
 
@@ -24,7 +30,10 @@ class GalleryServiceImpl(
     private val tinifyService: TinifyService,
     private val imageMapper: ImageMapper,
     private val galleryMapper: GalleryMapper,
+    private val webClient: WebClient
 ) : GalleryService {
+
+    private val log = LoggerFactory.getLogger(javaClass)
 
     override fun findAll(): Flux<Gallery> {
         return galleryRepository.findAll()
@@ -118,6 +127,50 @@ class GalleryServiceImpl(
         return galleryRepository.findByUuidIn(ids)
     }
 
+    override fun saveFromUrl(uuid: String, images: List<ImageUrlRequest>): Mono<Gallery> {
+        return Flux.fromIterable(images.asIterable())
+            .flatMap { Mono.just(imageMapper.toModel(it)) }
+            .flatMap { image ->
+                getImageFromUrl(image.url!!)
+                    .flatMap { tinifyService.compressImage(it) }
+                    .flatMap { storeImage(image, it, uuid) }
+                    .toMono()
+            }
+            .collectList()
+            .map { Gallery(uuid, it) }
+            .flatMap(galleryRepository::save)
+    }
+
+    override fun updateFromUrl(uuid: String, images: List<ImageUrlRequest>): Mono<Gallery> {
+        val galleryMono = galleryRepository.findById(uuid).defaultIfEmpty(Gallery(uuid, mutableListOf()))
+        val imageFlux = Flux.fromIterable(images.asIterable())
+
+        return galleryMono.flatMap { gallery ->
+            imageFlux.flatMap { imageRequest ->
+                var image = imageRequest.uuid?.let { gallery.images.find { image -> image.uuid == it } }
+
+                if (image == null && imageRequest.url !== null) {
+                    image = imageMapper.toModel(imageRequest)
+                    gallery.images.add(image)
+                }
+
+                var monoImage = Mono.justOrEmpty(image)
+
+                if (image != null) {
+                    imageMapper.updateModel(imageRequest, image)
+                    monoImage = getImageFromUrl(image.url!!)
+                        .flatMap { tinifyService.compressImage(it) }
+                        .flatMap { storeImage(image, it, gallery.uuid) }
+                        .toMono()
+                }
+
+                monoImage
+            }
+                .then(Mono.just(gallery))
+                .flatMap(galleryRepository::save)
+        }
+    }
+
     private fun storeImage(image: Image, jsonNode: JsonNode, galleryUUID: String): Mono<Image> {
         image.size = jsonNode.get("input").get("size").asLong()
         return tinifyService.storeImage(jsonNode.get("output").get("url").textValue(), extensionName(image, galleryUUID))
@@ -129,5 +182,18 @@ class GalleryServiceImpl(
         val extensionIndex = image.fileName!!.lastIndexOf('.')
         val extension = if (extensionIndex > 0) image.fileName!!.substring(extensionIndex) else ""
         return "${image.uuid}-$galleryUUID$extension"
+    }
+
+    private fun getImageFromUrl(url: String): Mono<ByteArray> {
+        return try {
+            webClient.get()
+                .uri(url)
+                .accept(MediaType.ALL)
+                .retrieve()
+                .bodyToMono(ByteArray::class.java)
+        } catch (e: Exception) {
+            log.debug(e.message)
+            throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY)
+        }
     }
 }

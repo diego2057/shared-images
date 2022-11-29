@@ -1,4 +1,5 @@
 app:
+  name: shared_images
   description: ${app.name} is a Spring Boot application
   tinify:
     url: https://api.tinify.com
@@ -20,6 +21,13 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  kafka:
+    bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9092}
+    consumer:
+      group-id: ${MS_NAME:shared_images}
+      bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9092}
 server:
   error:
     include-stacktrace: never
