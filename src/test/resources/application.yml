@@ -10,3 +10,8 @@ app:
 spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
+  kafka:
+    bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9093}
+    consumer:
+      group-id: default
+      bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9093}
