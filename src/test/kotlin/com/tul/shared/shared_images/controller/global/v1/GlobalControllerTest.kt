@@ -72,6 +72,6 @@ class GlobalControllerTest {
         client.get()
             .uri("/_global/v1/backoffice/images/${UUID.randomUUID()}")
             .exchange()
-            .expectStatus().isNotFound
+            .expectStatus().isOk
     }
 }
