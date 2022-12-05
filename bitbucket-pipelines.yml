@@ -1,23 +1,10 @@
 image: gradle:6.6.1-jdk11
-
 clone:
   depth: full
-
 definitions:
   caches:
     sonar: ~/.sonar/cache
-  services:
-    docker:
-      memory: 2048
   steps:
-    - step: &Lint
-        name: Lint and Compile
-        caches:
-          - gradle
-        script:
-          - gradle clean ktlintCheck compileKotlin -PnexusHost=https://nexus.dev.soytul.com --info
-        artifacts:
-          - build/**
     - step: &Test
         name: Test
         size: 2x
@@ -28,16 +15,12 @@ definitions:
           - gradle build jacocoTestReport sonarqube -x lintKotlin
         artifacts:
           - build/**
-
 pipelines:
   branches:
     develop:
       - parallel:
-          - step: *Lint
-          - step: *Test
           - step:
               name: Deploy develop
-              size: 2x
               deployment: test
               services:
                 - docker
@@ -98,13 +81,11 @@ pipelines:
                     ARGOS_PASSWORD: $ARGOS_DEV_PASSWORD
                     ARGOS_NAME: $NAME
                     ARGOS_TAG: $TAG
+          - step: *Test
     release/*:
-      - step: *Lint
       - step: *Test
     master:
       - parallel:
-          - step: *Lint
-          - step: *Test
           - step:
               name: Deploy master
               deployment: production
@@ -167,6 +148,7 @@ pipelines:
                 #    ARGOS_PASSWORD: $ARGOS_PROD_PASSWORD
                 #    ARGOS_NAME: $NAME
                 #    ARGOS_TAG: $TAG
+          - step: *Test
   default:
     - parallel:
         - step:
