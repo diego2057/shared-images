@@ -1,10 +1,12 @@
 package com.tul.shared.shared_images.controller.global.v1
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.tul.shared.shared_images.configuration.TestConfiguration
 import com.tul.shared.shared_images.configuration.TinifyMock
 import com.tul.shared.shared_images.controller.image.v1.ImageController
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,6 +38,9 @@ class GlobalControllerTest {
     private lateinit var globalController: GlobalController
 
     private lateinit var client: WebTestClient
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     private var tinifyMock = TinifyMock(8090)
 
@@ -85,5 +90,32 @@ class GlobalControllerTest {
             .uri("/_global/v1/backoffice/images/${UUID.randomUUID()}")
             .exchange()
             .expectStatus().isOk
+    }
+
+    @Test
+    fun indexMultiple() {
+        val uuid = UUID.randomUUID().toString()
+        val bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("image", ClassPathResource("test.png"), MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("uuid", uuid)
+
+        client.post()
+            .uri("/v1/images")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(ImageDto::class.java).returnResult().responseBody
+
+        val response = client.post()
+            .uri("/_global/v1/backoffice/images/index/multiple")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(objectMapper.writeValueAsString(listOf(uuid))))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(Array<ImageDto>::class.java)
+            .returnResult().responseBody!!
+
+        Assertions.assertEquals(1, response.size)
     }
 }
