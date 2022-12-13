@@ -18,24 +18,20 @@ class ImagesConsumer(
     fun images(request: ImageKafkaRequest) {
         logger.debug("New image request - Kafka: ${request.asJsonString()}")
 
-        try {
-            when (request.action) {
-                Action.create -> {
-                    logger.debug("Creating image - Kafka: ${request.body?.asJsonString()}")
-                    request.body?.let { this.imageService.saveOrUpdateFromUrl(it).block() }
-                    logger.debug("Image created from Kafka with UUID: ${request.body?.uuid}")
-                }
-                Action.update -> {
-                    logger.debug("Updating image - Kafka: ${request.body?.asJsonString()}")
-                    request.body?.let { this.imageService.saveOrUpdateFromUrl(it).block() }
-                    logger.debug("Image updated from Kafka with UUID: ${request.body?.uuid}")
-                }
-                else -> {
-                    logger.debug("Action to execute unknown: ${request.action}")
-                }
+        when (request.action) {
+            Action.create -> {
+                logger.debug("Creating image - Kafka: ${request.body?.asJsonString()}")
+                request.body?.let { this.imageService.saveOrUpdateFromUrl(it).block() }
+                logger.debug("Image created from Kafka with UUID: ${request.body?.uuid}")
             }
-        } catch (e: Exception) {
-            logger.error("Exception processing image - Kafka", e)
+            Action.update -> {
+                logger.debug("Updating image - Kafka: ${request.body?.asJsonString()}")
+                request.body?.let { this.imageService.saveOrUpdateFromUrl(it).block() }
+                logger.debug("Image updated from Kafka with UUID: ${request.body?.uuid}")
+            }
+            else -> {
+                logger.debug("Action to execute unknown: ${request.action}")
+            }
         }
     }
 }

@@ -15,27 +15,23 @@ class GalleriesConsumer(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @KafkaListener(topics = ["v1.shared-images.galleries"], containerFactory = "config.kafka.gallery.consumerFactory")
-    fun images(request: GalleryKafkaRequest) {
+    fun galleries(request: GalleryKafkaRequest) {
         logger.debug("New gallery request - Kafka: ${request.asJsonString()}")
 
-        try {
-            when (request.action) {
-                Action.create -> {
-                    logger.debug("Creating gallery - Kafka: ${request.body?.asJsonString()}")
-                    request.body?.let { it.uuid?.let { it1 -> this.galleryService.saveFromUrl(it1, it.images).block() } }
-                    logger.debug("Gallery created from Kafka with UUID: ${request.body?.uuid}")
-                }
-                Action.update -> {
-                    logger.debug("Updating gallery - Kafka: ${request.body?.asJsonString()}")
-                    request.body?.let { it.uuid?.let { it1 -> this.galleryService.updateFromUrl(it1, it.images).block() } }
-                    logger.debug("Gallery updated from Kafka with UUID: ${request.body?.uuid}")
-                }
-                else -> {
-                    logger.debug("Action to execute unknown: ${request.action}")
-                }
+        when (request.action) {
+            Action.create -> {
+                logger.debug("Creating gallery - Kafka: ${request.body?.asJsonString()}")
+                request.body?.let { it.uuid?.let { it1 -> this.galleryService.saveFromUrl(it1, it.images).block() } }
+                logger.debug("Gallery created from Kafka with UUID: ${request.body?.uuid}")
             }
-        } catch (e: Exception) {
-            logger.error("Exception processing gallery - Kafka", e)
+            Action.update -> {
+                logger.debug("Updating gallery - Kafka: ${request.body?.asJsonString()}")
+                request.body?.let { it.uuid?.let { it1 -> this.galleryService.updateFromUrl(it1, it.images).block() } }
+                logger.debug("Gallery updated from Kafka with UUID: ${request.body?.uuid}")
+            }
+            else -> {
+                logger.debug("Action to execute unknown: ${request.action}")
+            }
         }
     }
 }

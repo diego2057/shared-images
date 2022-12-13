@@ -3,7 +3,6 @@ package com.tul.shared.shared_images.controller.gallery.v1
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryDto
 import com.tul.shared.shared_images.dto.gallery.v1.GalleryMapper
 import com.tul.shared.shared_images.service.gallery.GalleryService
-import io.swagger.annotations.Api
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +16,6 @@ import java.util.UUID
 
 @RestController("_client.gallery.crud")
 @RequestMapping("_client/v1/galleries")
-@Api(tags = ["client.gallery"])
 class ClientGalleryController(
     private val galleryService: GalleryService,
     private val galleryMapper: GalleryMapper

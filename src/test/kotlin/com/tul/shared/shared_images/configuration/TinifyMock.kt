@@ -41,7 +41,7 @@ class TinifyMock(private val port: Int) : WireMockServer(port) {
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withHeader(HttpHeaders.LOCATION, "https://s3.us-east-2.amazonaws.com/images/test.png")
+                        .withHeader(HttpHeaders.LOCATION, "https://backoffice.tul.com.co/assets/images/logo-tul.png")
                         .withBody("{ status : success }")
                 )
         )

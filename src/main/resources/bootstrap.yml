@@ -5,6 +5,7 @@ spring:
     active: ${ENVIRONMENT:dev}
   cloud:
     config:
-      uri: http://shared-config-server.shared-config-server.svc/
+      uri: ${SHARED_CONFIG_SERVER_URL:http://shared-config-server.shared-config-server.svc}
+      label: springboot_2_7
       enabled: true
       fail-fast: true

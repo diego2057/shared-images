@@ -6,6 +6,7 @@ import com.tul.shared.shared_images.dto.gallery.v1.GalleryDto
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,10 +28,18 @@ import java.util.UUID
 @DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ImagesControllerTest {
+
     @Autowired
+    private lateinit var imagesController: ImagesController
+
     private lateinit var client: WebTestClient
 
     private var tinifyMock = TinifyMock(8090)
+
+    @BeforeEach
+    fun setup() {
+        client = WebTestClient.bindToController(imagesController).build()
+    }
 
     @BeforeAll
     fun loadMock() {
@@ -57,7 +66,7 @@ class ImagesControllerTest {
             .expectStatus().isOk
             .expectBody()
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
+            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
     }
 
     @Test
@@ -96,7 +105,7 @@ class ImagesControllerTest {
             .expectStatus().isOk
             .expectBody()
             .jsonPath("uuid").isEqualTo(imageId!!)
-            .jsonPath("file_name").isEqualTo(file.filename!!)
+            .jsonPath("fileName").isEqualTo(file.filename!!)
     }
 
     @Test

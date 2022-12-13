@@ -1,6 +1,8 @@
 spring:
+  profiles:
+    active: test
   cloud:
     config:
-      uri: http://shared-config-server.shared-config-server.svc/
+      uri: http://localhost:8081/
       enabled: true
       fail-fast: false

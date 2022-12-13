@@ -8,6 +8,7 @@ import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -31,12 +32,19 @@ import java.util.UUID
 class ImageControllerTest {
 
     @Autowired
+    private lateinit var imageController: ImageController
+
     private lateinit var client: WebTestClient
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     private var tinifyMock = TinifyMock(8090)
+
+    @BeforeEach
+    fun setup() {
+        client = WebTestClient.bindToController(imageController).build()
+    }
 
     @BeforeAll
     fun loadMock() {
@@ -82,7 +90,7 @@ class ImageControllerTest {
             .expectStatus().isOk
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
-            .jsonPath("file_name").isEqualTo("test.png")
+            .jsonPath("fileName").isEqualTo("test.png")
 
         client.post()
             .uri("/v1/images")

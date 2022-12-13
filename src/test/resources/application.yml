@@ -15,3 +15,5 @@ spring:
     consumer:
       group-id: default
       bootstrap-servers: ${GLOBAL_KAFKA_HOST_PLAIN:localhost:9093}
+  profiles:
+    active: test

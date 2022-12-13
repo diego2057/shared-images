@@ -39,3 +39,14 @@ management:
         include: "*"
     loggers:
       enabled: false
+
+application:
+  name: "shared-images"
+  description: "Microservice in charge of handling the upload of images and image galleries for products and other utilities in Tul."
+  team: "cross-enki"
+  prefix-path: "/shared/images"
+  documentation:
+    controllers:
+      package: "com.tul.shared.shared_images.controller"
+    consumers:
+      package: "com.tul.shared.shared_images.kafka"

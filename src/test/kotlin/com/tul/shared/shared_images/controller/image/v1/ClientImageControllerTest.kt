@@ -5,6 +5,7 @@ import com.tul.shared.shared_images.configuration.TinifyMock
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,9 +29,19 @@ import java.util.UUID
 class ClientImageControllerTest {
 
     @Autowired
+    private lateinit var imageController: ImageController
+
+    @Autowired
+    private lateinit var clientImageController: ClientImageController
+
     private lateinit var client: WebTestClient
 
     private var tinifyMock = TinifyMock(8090)
+
+    @BeforeEach
+    fun setup() {
+        client = WebTestClient.bindToController(imageController, clientImageController).build()
+    }
 
     @BeforeAll
     fun loadMock() {

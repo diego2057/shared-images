@@ -9,7 +9,6 @@ import com.tul.shared.shared_images.dto.request.OnCreate
 import com.tul.shared.shared_images.dto.request.OnUpdate
 import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.service.image.ImageService
-import io.swagger.annotations.Api
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
@@ -32,7 +31,6 @@ import reactor.core.publisher.Mono
 
 @RestController("image.crud")
 @RequestMapping("v1/images")
-@Api(tags = ["image"])
 class ImageController(
     private val imageService: ImageService,
     private val imageMapper: ImageMapper,

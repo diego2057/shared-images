@@ -1,4 +1,4 @@
-image: gradle:6.6.1-jdk11
+image: gradle:7.6-jdk17
 clone:
   depth: full
 definitions:
@@ -12,7 +12,7 @@ definitions:
           - gradle
           - sonar
         script:
-          - gradle build jacocoTestReport sonarqube -x lintKotlin
+          - gradle build jacocoTestReport sonarqube -x lintKotlin -PnexusHost=https://nexus.dev.soytul.com
         artifacts:
           - build/**
 pipelines:
@@ -27,7 +27,7 @@ pipelines:
               caches:
                 - gradle
               script:
-                - gradle build -x lintKotlin -x test
+                - gradle build -x lintKotlin -x test -PnexusHost=https://nexus.dev.soytul.com
                 - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
                 - TAG="${BITBUCKET_COMMIT}"
                 - docker build -t $REPO_SLUG .
@@ -94,7 +94,7 @@ pipelines:
               caches:
                 - gradle
               script:
-                - gradle build -x lintKotlin -x test
+                - gradle build -x lintKotlin -x test -PnexusHost=https://nexus.dev.soytul.com
                 - REPO_SLUG="$(echo $BITBUCKET_REPO_SLUG | sed 's/_/-/g')"
                 - TAG="${BITBUCKET_COMMIT}"
                 - docker build -t $REPO_SLUG .
@@ -156,8 +156,8 @@ pipelines:
             caches:
               - gradle
             script:
-              - gradle lintKotlin
-              - gradle compileKotlin
+              - gradle lintKotlin -PnexusHost=https://nexus.dev.soytul.com
+              - gradle compileKotlin -PnexusHost=https://nexus.dev.soytul.com
         - step: *Test
         - step:
             name: Security scan
