@@ -4,7 +4,6 @@ import com.tul.shared.shared_images.configuration.TestConfiguration
 import com.tul.shared.shared_images.configuration.TinifyMock
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -20,7 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import java.util.UUID
 
-@SpringBootTest(classes = [TestConfiguration::class])
+@SpringBootTest(classes = [TestConfiguration::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
 @DirtiesContext
@@ -28,19 +27,9 @@ import java.util.UUID
 class ClientGalleryControllerTest {
 
     @Autowired
-    private lateinit var galleryController: GalleryController
-
-    @Autowired
-    private lateinit var clientGalleryController: ClientGalleryController
-
     private lateinit var client: WebTestClient
 
     private var tinifyMock = TinifyMock(8090)
-
-    @BeforeEach
-    fun setup() {
-        client = WebTestClient.bindToController(galleryController, clientGalleryController).build()
-    }
 
     @BeforeAll
     fun loadMock() {
@@ -56,8 +45,9 @@ class ClientGalleryControllerTest {
     fun findGalleryByIdTest() {
         val uuid = UUID.randomUUID().toString()
         val file = ClassPathResource("test.png")
+
         val bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("images[0].image", file, MediaType.MULTIPART_FORM_DATA)
+        bodyBuilder.part("images[0].image", file, MediaType.IMAGE_PNG)
         bodyBuilder.part("uuid", uuid)
 
         client.post()
@@ -75,6 +65,6 @@ class ClientGalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
     }
 }

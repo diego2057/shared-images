@@ -8,7 +8,6 @@ import com.tul.shared.shared_images.dto.image.v1.ImageUrlRequest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -23,8 +22,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
-@SpringBootTest(classes = [TestConfiguration::class])
+@SpringBootTest(classes = [TestConfiguration::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
 @DirtiesContext
@@ -32,19 +32,12 @@ import java.util.UUID
 class ImageControllerTest {
 
     @Autowired
-    private lateinit var imageController: ImageController
-
     private lateinit var client: WebTestClient
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     private var tinifyMock = TinifyMock(8090)
-
-    @BeforeEach
-    fun setup() {
-        client = WebTestClient.bindToController(imageController).build()
-    }
 
     @BeforeAll
     fun loadMock() {
@@ -90,7 +83,7 @@ class ImageControllerTest {
             .expectStatus().isOk
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
-            .jsonPath("fileName").isEqualTo("test.png")
+            .jsonPath("file_name").isEqualTo("test.png")
 
         client.post()
             .uri("/v1/images")
@@ -150,7 +143,7 @@ class ImageControllerTest {
 
     @Test
     fun notFoundImageByIdTest() {
-        Thread.sleep(100)
+        TimeUnit.MILLISECONDS.sleep(2500)
         client.get()
             .uri("/v1/images/${UUID.randomUUID()}")
             .exchange()

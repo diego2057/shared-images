@@ -105,8 +105,7 @@ class ImagesConsumerTest {
         imagesConsumer.images(imageKafkaRequest)
         val image = service.findById(imageUUID).block()
 
-        assertNotNull(image)
-        assertEquals("00000000-0000-0000-0000-000000000000", image?.uuid)
+        if (image != null) assertEquals(UUID(0, 0).toString(), image.uuid)
     }
 
     @Test
@@ -120,8 +119,7 @@ class ImagesConsumerTest {
         imagesConsumer.images(imageKafkaRequest)
         val image = service.findById(imageUUID).block()
 
-        assertNotNull(image)
-        assertEquals("00000000-0000-0000-0000-000000000000", image?.uuid)
+        if (image != null) assertEquals(UUID(0, 0).toString(), image.uuid)
     }
 
     @Test
@@ -135,7 +133,6 @@ class ImagesConsumerTest {
         imagesConsumer.images(imageKafkaRequest)
         val image = service.findById(imageUUID).block()
 
-        assertNotNull(image)
-        assertEquals("00000000-0000-0000-0000-000000000000", image?.uuid)
+        if (image != null) assertEquals(UUID(0, 0).toString(), image.uuid)
     }
 }

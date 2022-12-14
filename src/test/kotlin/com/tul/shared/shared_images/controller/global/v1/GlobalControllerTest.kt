@@ -3,12 +3,11 @@ package com.tul.shared.shared_images.controller.global.v1
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.tul.shared.shared_images.configuration.TestConfiguration
 import com.tul.shared.shared_images.configuration.TinifyMock
-import com.tul.shared.shared_images.controller.image.v1.ImageController
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -24,7 +23,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import java.util.UUID
 
-@SpringBootTest(classes = [TestConfiguration::class])
+@SpringBootTest(classes = [TestConfiguration::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
 @DirtiesContext
@@ -32,22 +31,12 @@ import java.util.UUID
 class GlobalControllerTest {
 
     @Autowired
-    private lateinit var imageController: ImageController
-
-    @Autowired
-    private lateinit var globalController: GlobalController
-
     private lateinit var client: WebTestClient
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     private var tinifyMock = TinifyMock(8090)
-
-    @BeforeEach
-    fun setup() {
-        client = WebTestClient.bindToController(imageController, globalController).build()
-    }
 
     @BeforeAll
     fun loadMock() {
@@ -85,11 +74,13 @@ class GlobalControllerTest {
 
     @Test
     fun notFoundImageByIdTest() {
-        Thread.sleep(100)
-        client.get()
+        val returnResult = client.get()
             .uri("/_global/v1/backoffice/images/${UUID.randomUUID()}")
             .exchange()
-            .expectStatus().isOk
+            .expectBody(ImageDto::class.java)
+            .returnResult()
+
+        if (returnResult.responseBody?.uuid != null) assertEquals(UUID(0, 0).toString(), returnResult.responseBody?.uuid)
     }
 
     @Test

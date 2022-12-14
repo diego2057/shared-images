@@ -8,7 +8,6 @@ import com.tul.shared.shared_images.dto.gallery.v1.GalleryDto
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,7 +24,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import java.util.UUID
 
-@SpringBootTest(classes = [TestConfiguration::class])
+@SpringBootTest(classes = [TestConfiguration::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
 @DirtiesContext
@@ -33,21 +32,14 @@ import java.util.UUID
 class GalleryControllerTest {
 
     @Autowired
-    private lateinit var galleryController: GalleryController
+    private lateinit var client: WebTestClient
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private lateinit var client: WebTestClient
-
     private var tinifyMock = TinifyMock(8090)
 
     private val faker = Faker()
-
-    @BeforeEach
-    fun setup() {
-        client = WebTestClient.bindToController(galleryController).build()
-    }
 
     @BeforeAll
     fun loadMock() {
@@ -109,7 +101,7 @@ class GalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
     }
 
     @Test
@@ -134,7 +126,7 @@ class GalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
     }
 
     @Test
@@ -154,7 +146,7 @@ class GalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
 
         bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", file, MediaType.MULTIPART_FORM_DATA)
@@ -168,9 +160,9 @@ class GalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
             .jsonPath("images[1].uuid").isNotEmpty
-            .jsonPath("images[1].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[1].file_name").isEqualTo(file.filename!!)
     }
 
     @Test
@@ -190,7 +182,7 @@ class GalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
 
         bodyBuilder = MultipartBodyBuilder()
         bodyBuilder.part("image", file, MediaType.MULTIPART_FORM_DATA)
@@ -204,9 +196,9 @@ class GalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
             .jsonPath("images[1].uuid").isNotEmpty
-            .jsonPath("images[1].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[1].file_name").isEqualTo(file.filename!!)
     }
 
     @Test
@@ -226,7 +218,7 @@ class GalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
     }
 
     @Test
@@ -249,7 +241,7 @@ class GalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo("test.png")
+            .jsonPath("images[0].file_name").isEqualTo("test.png")
     }
 
     @Test
@@ -290,10 +282,10 @@ class GalleryControllerTest {
             .expectBody()
             .jsonPath("uuid").isEqualTo(uuid)
             .jsonPath("images[0].uuid").isNotEmpty
-            .jsonPath("images[0].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[0].file_name").isEqualTo(file.filename!!)
             .jsonPath("images[1].uuid").isNotEmpty
-            .jsonPath("images[1].fileName").isEqualTo(file.filename!!)
-            .jsonPath("images[2].fileName").isEqualTo(file.filename!!)
+            .jsonPath("images[1].file_name").isEqualTo(file.filename!!)
+            .jsonPath("images[2].file_name").isEqualTo(file.filename!!)
             .jsonPath("images.length()").isEqualTo(3)
     }
 

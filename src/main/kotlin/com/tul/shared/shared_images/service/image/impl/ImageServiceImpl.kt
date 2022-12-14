@@ -10,7 +10,6 @@ import com.tul.shared.shared_images.repository.image.CrudRepository
 import com.tul.shared.shared_images.service.image.ImageService
 import com.tul.shared.shared_images.service.tinify.TinifyService
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -42,8 +41,8 @@ class ImageServiceImpl(
     override fun save(imageRequest: CreateImageRequest): Mono<Image> {
         val image = imageMapper.toModel(imageRequest)
         val file = imageRequest.image!!
-        image.fileName = file.filename()
-        image.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
+        image.fileName = file.originalFilename
+        image.mimeType = file.contentType
         return imageCrudRepository.findById(imageRequest.uuid!!)
             .doOnNext {
                 throw ResponseStatusException(
@@ -52,7 +51,7 @@ class ImageServiceImpl(
                 )
             }
             .switchIfEmpty(
-                tinifyService.compressImage(file)
+                tinifyService.compressImage(file.bytes)
                     .flatMap { storeImage(image, it) }
             )
     }
@@ -90,9 +89,9 @@ class ImageServiceImpl(
             .flatMap {
                 val file = imageRequest.image
                 if (file != null) {
-                    it.fileName = file.filename()
-                    it.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
-                    tinifyService.compressImage(file).flatMap { json -> storeImage(it, json) }
+                    it.fileName = file.originalFilename
+                    it.mimeType = file.contentType
+                    tinifyService.compressImage(file.bytes).flatMap { json -> storeImage(it, json) }
                 } else {
                     imageCrudRepository.save(it)
                 }

@@ -5,7 +5,6 @@ import com.tul.shared.shared_images.configuration.TinifyMock
 import com.tul.shared.shared_images.dto.image.v1.ImageDto
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -21,7 +20,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import java.util.UUID
 
-@SpringBootTest(classes = [TestConfiguration::class])
+@SpringBootTest(classes = [TestConfiguration::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
 @DirtiesContext
@@ -29,19 +28,9 @@ import java.util.UUID
 class GuestImageControllerTest {
 
     @Autowired
-    private lateinit var imageController: ImageController
-
-    @Autowired
-    private lateinit var guestImageController: GuestImageController
-
     private lateinit var client: WebTestClient
 
     private var tinifyMock = TinifyMock(8090)
-
-    @BeforeEach
-    fun setup() {
-        client = WebTestClient.bindToController(imageController, guestImageController).build()
-    }
 
     @BeforeAll
     fun loadMock() {

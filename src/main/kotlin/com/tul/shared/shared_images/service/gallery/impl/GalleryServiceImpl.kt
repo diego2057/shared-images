@@ -12,7 +12,6 @@ import com.tul.shared.shared_images.model.Image
 import com.tul.shared.shared_images.repository.gallery.CrudRepository
 import com.tul.shared.shared_images.service.tinify.TinifyService
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -50,9 +49,9 @@ class GalleryServiceImpl(
             .flatMap { imageRequest ->
                 val image = imageMapper.toModel(imageRequest)
                 val file = imageRequest.image!!
-                image.fileName = file.filename()
-                image.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
-                tinifyService.compressImage(file).flatMap { storeImage(image, it, gallery.uuid) }
+                image.fileName = file.originalFilename
+                image.mimeType = file.contentType
+                tinifyService.compressImage(file.bytes).flatMap { storeImage(image, it, gallery.uuid) }
             }
             .collectList()
             .doOnNext { gallery.images = it }
@@ -68,9 +67,9 @@ class GalleryServiceImpl(
         return Mono.just(imageRequest).map(imageMapper::toModel)
             .flatMap {
                 val file = imageRequest.image!!
-                it.fileName = file.filename()
-                it.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
-                tinifyService.compressImage(file).flatMap { json -> storeImage(it, json, uuid) }
+                it.fileName = file.originalFilename
+                it.mimeType = file.contentType
+                tinifyService.compressImage(file.bytes).flatMap { json -> storeImage(it, json, uuid) }
             }
             .zipWith(galleryRepository.findById(uuid).defaultIfEmpty(Gallery(uuid, mutableListOf())))
             .doOnNext { it.t2.images.add(it.t1) }
@@ -99,9 +98,9 @@ class GalleryServiceImpl(
                     imageMapper.updateModel(imageRequest, image)
                     val file = imageRequest.image
                     if (file != null) {
-                        image.fileName = file.filename()
-                        image.mimeType = file.headers().getFirst(HttpHeaders.CONTENT_TYPE)
-                        monoImage = tinifyService.compressImage(file).flatMap { json -> storeImage(image, json, gallery.uuid) }
+                        image.fileName = file.originalFilename
+                        image.mimeType = file.contentType
+                        monoImage = tinifyService.compressImage(file.bytes).flatMap { json -> storeImage(image, json, gallery.uuid) }
                     }
                 }
                 monoImage
